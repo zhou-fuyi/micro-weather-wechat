@@ -1,4 +1,4 @@
-import { APP_CONFIG } from '../config/appConfig'
+import { APP_CONFIG } from '../config/app.config'
 
 export const request = (params) => {
     let {url} = params;

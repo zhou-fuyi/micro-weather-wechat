@@ -1,5 +1,7 @@
 // app.js
 import { APP_CONFIG } from './config/app.config'
+import { request } from './request/index';
+
 App({
   onLaunch() {
     // 展示本地存储能力
@@ -12,6 +14,18 @@ App({
       success: res => {
         console.log(res)
         // 发送 res.code 到后台换取 openId, sessionKey, unionId
+        request({
+          url: APP_CONFIG.apis.oauth.we_chat,
+          data: {
+            code: res.code
+          }
+        }).then((res) => {
+          console.log(res)
+        }).catch((err) => {
+          wx.showToast({
+            title: '微信登录失败.'
+          })
+        })
       }
     })
   },
