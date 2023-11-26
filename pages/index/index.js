@@ -1,48 +1,84 @@
 // index.js
-// 获取应用实例
-const app = getApp()
+import { MAP_CONFIG } from '../../config/app.config'
+const util = require('../../utils/util.js')
+// 引入SDK核心类
+var QQMapWX = require('../../libs/qqmap-wx-jssdk/qqmap-wx-jssdk');
+var qqmapsdk;
 
 Page({
-  data: {
-    motto: 'Hello World',
-    userInfo: {},
-    hasUserInfo: false,
-    canIUse: wx.canIUse('button.open-type.getUserInfo'),
-    canIUseGetUserProfile: false,
-    canIUseOpenData: wx.canIUse('open-data.type.userAvatarUrl') && wx.canIUse('open-data.type.userNickName') // 如需尝试获取用户信息可改为false
-  },
-  // 事件处理函数
-  bindViewTap() {
-    wx.navigateTo({
-      url: '../logs/logs'
-    })
-  },
-  onLoad() {
-    if (wx.getUserProfile) {
-      this.setData({
-        canIUseGetUserProfile: true
-      })
-    }
-  },
-  getUserProfile(e) {
-    // 推荐使用wx.getUserProfile获取用户信息，开发者每次通过该接口获取用户个人信息均需用户确认，开发者妥善保管用户快速填写的头像昵称，避免重复弹窗
-    wx.getUserProfile({
-      desc: '展示用户信息', // 声明获取用户个人信息后的用途，后续会展示在弹窗中，请谨慎填写
+  data: { 
+    ...MAP_CONFIG
+   },
+  //获得地图
+  getMapLocation(e) {
+    wx.getLocation({
+      type: 'gcj02',  //wgs84 返回 gps 坐标，gcj02 返回可用于 wx.openLocation 的坐标
+      isHighAccuracy: true,
+      // 箭头函数的this始终指向函数定义时的this
       success: (res) => {
         console.log(res)
+        const { latitude, longitude } = res;
         this.setData({
-          userInfo: res.userInfo,
-          hasUserInfo: true
-        })
+          location: {
+            latitude,
+            longitude
+          }
+        });
+      },
+      fail: (err) => {
+        console.log(err)
+        this.setData({...this.data.location})
       }
     })
   },
-  getUserInfo(e) {
-    // 不推荐使用getUserInfo获取用户信息，预计自2021年4月13日起，getUserInfo将不再弹出弹窗，并直接返回匿名的用户个人信息
+  slidingStart(e){
     console.log(e)
     this.setData({
-      userInfo: e.detail.userInfo,
-      hasUserInfo: true
+      start_y: e.touches[0].pageY * 0.97 - this.data.screenTop
     })
-  }
+  },
+  slidingEnd(e){
+    console.log(e)
+    let {pageY} = e.changedTouches[0];
+    pageY = pageY * 0.97 - this.data.screenTop;
+    // 上滑
+    if(this.data.start_y > pageY){
+      if(this.data.y != 0){
+        this.setData({
+          y: 0
+        })
+      }
+    }
+    // 下滑
+    if(this.data.start_y < pageY){
+      this.setData({
+        y: this.data.max_y
+      })
+    }
+  },
+  locationTap(e){
+    console.log(e)
+    this.getMapLocation();
+  },
+  onLoad() {
+    this.getMapLocation();
+    // 实例化API核心类
+    qqmapsdk = new QQMapWX({
+      key: this.data.key
+    });
+    wx.getSystemInfo({
+      complete: (res) => {
+        console.log(res)
+        this.setData({
+          screenHeight: util.px2rpx(res.screenHeight, res.screenWidth),
+          screenWidth: util.px2rpx(res.screenWidth, res.screenWidth),
+          screenTop: res.screenTop ? res.screenTop : 0,
+          originScreenHeight: res.screenHeight,
+          y: 0.67 * res.windowHeight,
+          max_y: 0.67 * res.windowHeight
+        })
+      },
+    })
+  },
+  
 })

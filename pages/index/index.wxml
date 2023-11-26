@@ -1,23 +1,66 @@
 <!--index.wxml-->
-<view class="container">
-  <view class="userinfo">
-    <block wx:if="{{canIUseOpenData}}">
-      <view class="userinfo-avatar" bindtap="bindViewTap">
-        <open-data type="userAvatarUrl"></open-data>
-      </view>
-      <open-data type="userNickName"></open-data>
-    </block>
-    <block wx:elif="{{!hasUserInfo}}">
-      <button wx:if="{{canIUseGetUserProfile}}" bindtap="getUserProfile"> 获取头像昵称 </button>
-      <button wx:elif="{{canIUse}}" open-type="getUserInfo" bindgetuserinfo="getUserInfo"> 获取头像昵称 </button>
-      <view wx:else> 请使用1.4.4及以上版本基础库 </view>
-    </block>
-    <block wx:else>
-      <image bindtap="bindViewTap" class="userinfo-avatar" src="{{userInfo.avatarUrl}}" mode="cover"></image>
-      <text class="userinfo-nickname">{{userInfo.nickName}}</text>
-    </block>
-  </view>
-  <view class="usermotto">
-    <text class="user-motto">{{motto}}</text>
+<view id="map-container">
+  <map latitude="{{location.latitude}}" longitude="{{location.longitude}}" show-location="{{showLocation}}" show-compass="{{showCompass}}" show-scale="{{showScale}}" scale="{{scale}}" subkey="{{key}}" layer-style="{{style}}"></map>
+</view>
+<!-- 上层页面 start -->
+<view class="left-container">
+  <view class="notice">
+    <text class="iconfont icon-lingdang"></text>
   </view>
 </view>
+<view class="right-container">
+  <view class="menu">
+    <text class="iconfont icon-caidan"></text>
+  </view>
+  <view class="layer">
+    <text class="iconfont icon-tuceng"></text>
+  </view>
+  <view class="location" bindtap="locationTap">
+    <text class="iconfont icon-dingweiweizhi"></text>
+  </view>
+</view>
+<view class="bottom-container">
+  <!-- <view class="bottom-bottom-container"></view>
+  <view class="bottom-top-container"></view> -->
+  <movable-area class="moveable-area" style="height:{{screenHeight * 2}}rpx">
+    <movable-view class="moveable-view" direction="vertical" inertia="false" damping="70" out-of-bounds="true" y="{{y}}" style="width:{{screenWidth}}rpx;height:{{screenHeight}}rpx" bindtouchstart="slidingStart" bindtouchend="slidingEnd">
+      <view class="bo-top-container">
+        <view class="_top">
+          <view class="left">
+            <text class="iconfont icon-wei- plus"></text>
+            <text>萧山</text>
+            <text class="iconfont icon-31guanzhu1 attention"></text>
+          </view>
+          <view class="right">
+            <text class="time">21:21 更新</text>
+            <text class="iconfont icon-shuaxin1"></text>
+          </view>
+        </view>
+        <view class="_bottom">
+          <view class="temperature">
+            <text id="temperature">8</text>
+          </view>
+          <view class="unit">
+            <text class="iconfont icon-morenyuanquan"></text>
+          </view>
+          <view class="middle">
+            <text>小雨</text>
+            <view class="aqi">
+              <text>AQI 优</text>
+            </view>
+          </view>
+          <view class="wind">
+            <text>西北风3级</text>
+          </view>
+        </view>
+      </view>
+      <view class="bo-other-container">
+        <view class="description">
+          <text>今晚小雪。明天阴，比今天暖和一些（6°），有风，空气不错。</text>
+          <view class="line"></view>
+        </view>
+      </view>
+    </movable-view>
+  </movable-area>
+</view>
+<!-- 上层页面 end -->

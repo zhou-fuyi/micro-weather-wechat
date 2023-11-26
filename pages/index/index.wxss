@@ -1,19 +1,187 @@
 /**index.wxss**/
-.userinfo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: #aaa;
-}
-
-.userinfo-avatar {
+page {
   overflow: hidden;
-  width: 128rpx;
-  height: 128rpx;
-  margin: 20rpx;
-  border-radius: 50%;
+}
+#map-container{ width:100%; height:100%; }
+#map-container map{ width:100%; height:100%; }
+.left-container {
+    position: absolute;
+    top: 40rpx;
+    left: 16rpx;  
 }
 
-.usermotto {
-  margin-top: 200px;
+.left-container .notice {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 80rpx;
+    width: 80rpx;
+    border: white solid 1rpx;
+    border-radius: 50%;
+    background-color: white;
+}
+
+.left-container text {
+    font-size: 40rpx;
+}
+
+.right-container {
+    position: absolute;
+    top: 40rpx;
+    right: 16rpx;
+}
+
+.right-container view{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 80rpx;
+    width: 80rpx;
+    border: white solid 1rpx;
+    border-radius: 50%;
+    background-color: white;
+    margin-bottom: 20rpx;
+}
+
+.right-container text {
+    font-size: 40rpx;
+}
+
+.bottom-container {
+    position: absolute;
+    bottom: -3%;
+    height: 100%;
+}
+
+.bottom-container .moveable-area {
+    height: 100%;
+}
+
+.bottom-container .moveable-view {
+    background-image: linear-gradient(to bottom, rgb(255, 255, 255, 0) 0.1%, rgb(255, 255, 255, 1) 99%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 浮动面板 */
+
+.bo-top-container {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    height: 230rpx;
+    margin: 0 auto;
+    background-color: rgb(29, 34, 40, .9);
+    color: white;
+    justify-content: space-between;
+    padding: 30rpx 40rpx;
+    border-radius: .5em;
+}
+
+.bo-top-container text {
+    font-size: 35rpx;
+}
+
+.bo-top-container ._top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bo-top-container ._top .left{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.left text{
+    margin-right: 20rpx;
+}
+
+.left .plus {
+    font-size: 45rpx;
+}
+
+.right text{
+    margin-left: 20rpx;
+}
+
+.right .time{
+    color: rgb(153, 157, 166);
+    font-size: 31rpx;
+}
+
+.bo-top-container ._bottom {
+    display: flex;
+}
+
+._bottom view {
+    margin-right: 21rpx;
+}
+
+.bo-top-container ._bottom .middle {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.bo-top-container ._bottom .aqi {
+    height: 38rpx;
+    border: rgb(155, 169, 123) solid 1rpx;
+    color: rgb(155, 169, 123);
+    padding: 3rpx 7rpx;
+    margin: 0;
+    line-height: 38rpx;
+    border-radius: 9%;
+}
+
+._bottom .middle .aqi text {
+    font-size: 30rpx;
+}
+
+.bo-top-container ._bottom .wind {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: 7rpx;
+}
+
+._bottom .temperature{
+    margin-right: 8rpx;
+}
+
+#temperature {
+    font-size: 110rpx;
+    font-weight: bolder;
+}
+
+.unit text{
+    font-weight: bolder;
+    display: flex;
+    margin-top: 16rpx;
+}
+
+/* other start */
+
+.bo-other-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    color: black;
+    justify-content: space-between;
+    font-size: 26rpx;
+}
+
+.bo-other-container .description {
+    margin-top: 25rpx;
+    padding: 0 30rpx;
+}
+
+.line {
+    width: 100%;
+    padding: 0;
+    margin-top: 18rpx;
+    background: rgb(219, 219, 219);
 }

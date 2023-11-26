@@ -14,6 +14,24 @@ const formatNumber = n => {
   return n[1] ? n : `0${n}`
 }
 
+/**
+ * px to rpx
+ * 
+ * 参考：https://juejin.cn/post/6877373754601013255
+ * 
+ * @param {*} px 
+ * @param {*} windowWidth 
+ * @returns 
+ */
+const px2rpx = (px, windowWidth) => {
+  return px * (750 / windowWidth)
+}
+
+const rpx2px = (rpx, windowWidth) => {
+  return px / (750 / windowWidth)
+}
+
 module.exports = {
-  formatTime
+  formatTime,
+  px2rpx
 }

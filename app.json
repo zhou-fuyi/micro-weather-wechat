@@ -1,14 +1,24 @@
 {
-  "pages":[
+  "pages": [
     "pages/index/index",
-    "pages/logs/logs"
+    "pages/city/city"
   ],
-  "window":{
-    "backgroundTextStyle":"light",
+  "window": {
+    "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#fff",
-    "navigationBarTitleText": "Weixin",
-    "navigationBarTextStyle":"black"
+    "navigationBarTitleText": "微天气",
+    "navigationBarTextStyle": "black"
   },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "你的位置信息将用于小程序定位"
+    }
+  },
+  "requiredPrivateInfos":[
+    "getLocation"
+  ],
   "style": "v2",
-  "sitemapLocation": "sitemap.json"
+  "darkmode": true,
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"  
 }
