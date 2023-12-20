@@ -1,6 +1,6 @@
 <!--index.wxml-->
 <view id="map-container">
-  <map latitude="{{location.latitude}}" longitude="{{location.longitude}}" show-location="{{showLocation}}" show-compass="{{showCompass}}" show-scale="{{showScale}}" scale="{{scale}}" subkey="{{key}}" layer-style="{{style}}"></map>
+  <map id="qq_map_wx"  latitude="{{location.latitude}}" longitude="{{location.longitude}}" show-location="{{showLocation}}" show-compass="{{showCompass}}" show-scale="{{showScale}}" scale="{{scale}}" subkey="{{key}}" layer-style="{{style}}" bindregionchange="onChangeRegion"></map>
 </view>
 <!-- 上层页面 start -->
 <view class="left-container">
@@ -15,7 +15,7 @@
   <view class="layer">
     <text class="iconfont icon-tuceng"></text>
   </view>
-  <view class="location" bindtap="locationTap">
+  <view class="location {{located ? 'location-hover' : ''}}" bindtap="locationTap">
     <text class="iconfont icon-dingweiweizhi"></text>
   </view>
 </view>
@@ -27,30 +27,30 @@
       <view class="bo-top-container">
         <view class="_top">
           <view class="left">
-            <text class="iconfont icon-wei- plus"></text>
-            <text>萧山</text>
+            <view catchtap="chooseCity"><text class="iconfont icon-wei- plus"></text></view>
+            <text>{{district.name}}</text>
             <text class="iconfont icon-31guanzhu1 attention"></text>
           </view>
           <view class="right">
-            <text class="time">21:21 更新</text>
+            <text class="time">{{weather_real_time.hour}}:{{weather_real_time.minute}} 更新</text>
             <text class="iconfont icon-shuaxin1"></text>
           </view>
         </view>
         <view class="_bottom">
           <view class="temperature">
-            <text id="temperature">8</text>
+            <text id="temperature">{{weather_real_time.temp}}</text>
           </view>
           <view class="unit">
             <text class="iconfont icon-morenyuanquan"></text>
           </view>
           <view class="middle">
-            <text>小雨</text>
+            <text>{{weather_real_time.text}}</text>
             <view class="aqi">
-              <text>AQI 优</text>
+              <text>AQI {{air_real_time.category}}</text>
             </view>
           </view>
           <view class="wind">
-            <text>西北风3级</text>
+            <text>{{weather_real_time.windDir}}{{weather_real_time.windScale}}级</text>
           </view>
         </view>
       </view>

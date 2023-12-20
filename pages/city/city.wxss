@@ -1,1 +1,65 @@
 /* pages/city/city.wxss */
+page {
+  background: rgb(246, 246, 246);
+}
+
+.top {
+  width: 100%;
+}
+
+.top .search-content {
+  width: 90%;
+  margin: 7rpx auto 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgb(244, 244, 244);
+  color: rgb(143, 143, 143);
+  height: 70rpx;
+}
+
+.top ._search_icon {
+  font-size: 30rpx;
+  margin-left: 20rpx;
+  margin-right: 15rpx;
+}
+
+.search-bar {
+  width: 100%;
+  line-height: 1.4rem;
+  font-size: 32rpx;
+  border: 0;
+  box-sizing: content-box;
+  background: transparent;
+  caret-color: rgb(143, 143, 143);
+  color: black;
+}
+
+.option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: rgb(222, 222, 222) solid 1rpx;
+}
+
+.option view {
+  font-size: 32rpx;
+  height: 70rpx;
+  line-height: 70rpx;
+  padding: 0 49rpx;
+}
+
+.search-result {
+  position: absolute;
+  top: 76rpx;
+  left: 0;
+  width: 100%;
+}
+
+.show {
+  display: block;
+}
+
+.hide {
+  display: none;
+}

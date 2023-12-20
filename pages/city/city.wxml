@@ -1,2 +1,24 @@
 <!--pages/city/city.wxml-->
-<text>pages/city/city.wxml</text>
+<view class="top">
+    <view class="search-content">
+        <text class="_search_icon iconfont icon-search"></text>
+        <input type="text" class="search-bar" placeholder="添加城市" value="{{inputVal}}" focus="{{inputShowed}}" bindinput="inputTyping" />
+    </view>
+</view>
+<view class="follow-cities" wx:if="{{city_panel_showed}}">
+    <view wx:for="{{follow_cities}}" wx:key="id">
+        <view class="option"  catchtap="toggleCity" data-division-id="{{item.divisionId}}">
+            <view>{{item.divisionName}}</view>
+            <view>{{item.divisionCode}}</view>
+            <!-- <view>{{item.grade}}</view> -->
+        </view>
+    </view>
+</view>
+<view class="search-result" wx:if="{{!city_panel_showed}}">
+    <view wx:for="{{search_cities}}" wx:key="id">
+        <view class="option" catchtap="chooseCity" data-division-id="{{item.id}}" data-division-code="{{item.code}}" data-division-name="{{item.name}}">
+            <view>{{item.name}}</view>
+            <view>{{item.code}}</view>
+        </view>
+    </view>
+</view>

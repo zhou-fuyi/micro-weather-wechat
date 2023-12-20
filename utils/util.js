@@ -31,7 +31,25 @@ const rpx2px = (rpx, windowWidth) => {
   return px / (750 / windowWidth)
 }
 
+/**
+ * 时间解构
+ * @param {*} time_str such as: '2022-02-03T11:53+08:00'
+ * @returns {year, month, day, hour, minute, second}
+ */
+const deconstructionTime = (time_str) => {
+  let date = new Date(time_str)
+  return {
+    year: date.getFullYear(),
+    month: date.getMonth() + 1,
+    day: date.getDate(),
+    hour: date.getHours(),
+    minute: date.getMinutes(),
+    second: date.getSeconds()
+  }
+}
+
 module.exports = {
   formatTime,
-  px2rpx
+  px2rpx,
+  deconstructionTime
 }

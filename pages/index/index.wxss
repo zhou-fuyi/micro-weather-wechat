@@ -22,7 +22,7 @@ page {
 }
 
 .left-container text {
-    font-size: 40rpx;
+  font-size: 49rpx;
 }
 
 .right-container {
@@ -44,7 +44,10 @@ page {
 }
 
 .right-container text {
-    font-size: 40rpx;
+  font-size: 49rpx;
+}
+.location-hover {
+  color: blue;
 }
 
 .bottom-container {
