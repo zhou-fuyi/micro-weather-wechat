@@ -232,7 +232,7 @@ page {
 
 .hour_forecast {
   width: 100%;
-  height: 33%;
+  height: 25%;
   margin: 20rpx auto 0;
 }
 

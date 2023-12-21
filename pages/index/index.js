@@ -182,6 +182,8 @@ Page({
             type: 'value',
             name: '降水概率',
             position: 'right',
+            min: 0, 
+            max: 100,
             axisLabel: {
               formatter: '{value} %'
             }

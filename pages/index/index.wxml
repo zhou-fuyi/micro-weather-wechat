@@ -22,7 +22,7 @@
 <view class="bottom-container">
   <!-- <view class="bottom-bottom-container"></view>
   <view class="bottom-top-container"></view> -->
-  <movable-area class="moveable-area" style="height:{{screenHeight * 2.7}}rpx">
+  <movable-area class="moveable-area" style="height:{{screenHeight * 2}}rpx">
     <movable-view class="moveable-view" direction="vertical" inertia="false" damping="70" out-of-bounds="true" y="{{y}}" style="width:{{screenWidth}}rpx;height:{{screenHeight}}rpx" bindtouchstart="slidingStart" bindtouchend="slidingEnd">
       <view class="bo-top-container">
         <view class="_top">
@@ -63,7 +63,7 @@
           </view>
         </view>
       </view>
-      <view class="bo-other-container">
+      <!--<view class="bo-other-container">
         <view class="description">
           <text>
             {{ date_time_struct.hour < 17 ? '今天' + day_by_day[0].textDay : '今晚' + day_by_day[0].textNight }}，最低温{{day_by_day[0].tempMin}}度，最高温{{day_by_day[0].tempMax}}度。明天{{day_by_day[1].textDay}}，最低温{{day_by_day[1].tempMin}}度，最高温{{day_by_day[1].tempMax}}度。
@@ -89,7 +89,34 @@
             <view class="last"><text>{{item.tempMax}}° / {{item.tempMin}}°</text></view>
           </view>
         </view>
-      </view>
+      </view> -->
+      <scroll-view scroll-y="true" style="height:{{screenHeight * 2 - 230}}rpx">
+        <view class="bo-other-container" style="height:{{screenHeight}}rpx">
+          <view class="description">
+            <text>{{ date_time_struct.hour < 17 ? '今天' + day_by_day[0].textDay : '今晚' + day_by_day[0].textNight }}，最低温{{day_by_day[0].tempMin}}度，最高温{{day_by_day[0].tempMax}}度。明天{{day_by_day[1].textDay}}，最低温{{day_by_day[1].tempMin}}度，最高温{{day_by_day[1].tempMax}}度。</text>
+          </view>
+          <view class="line"></view>
+          <view class="hour_forecast">
+            <ec-canvas id="24h" canvas-id="24h-canvas" ec="{{ec}}"></ec-canvas>
+          </view>
+          <view class="day_forecast">
+            <view wx:for="{{day_by_day}}" wx:key="fxDate" class="option">
+              <text>{{item.day_of_week}}</text>
+              <view class="day">
+                <text> 白天</text>
+                <text class="{{ 'qi-' + item.iconDay}}"></text>
+                <text>{{item.textDay}}</text>
+              </view>
+              <view class="night">
+                <text>晚间</text>
+                <text class="{{ 'qi-' + item.iconNight}}"></text>
+                <text>{{item.iconNight}}</text>
+              </view>
+              <view class="last"><text>{{item.tempMax}}° / {{item.tempMin}}°</text></view>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
     </movable-view>
   </movable-area>
 </view>
