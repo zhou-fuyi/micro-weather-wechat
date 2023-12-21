@@ -34,7 +34,7 @@
               </view>
           </view>
           <view class="right">
-            <text class="time">{{weather_real_time.hour}}:{{weather_real_time.minute}} 更新</text>
+            <text class="time">{{weather_real_time.hour}}:{{weather_real_time.minute < 10 ? '0' + weather_real_time.minute: weather_real_time.minute}} 更新</text>
             <view id="icon-rotate-container" catchtap="onWeatherflush"><text class="iconfont icon-shuaxin1"></text></view>
           </view>
         </view>
@@ -60,6 +60,9 @@
         <view class="description">
           <text>{{ date_time_struct.hour > 17 ? '今天' + day_by_day[0].textDay : '今晚' + day_by_day[0].textNight }}。明天{{day_by_day[1].textDay}}，最低温为{{day_by_day[1].tempMin}}度，最高温为{{day_by_day[1].tempMax}}度。</text>
           <view class="line"></view>
+        </view>
+        <view class="hour_forecast">
+          <ec-canvas id="24h" canvas-id="24h-canvas" ec="{{ec}}"></ec-canvas>
         </view>
       </view>
     </movable-view>

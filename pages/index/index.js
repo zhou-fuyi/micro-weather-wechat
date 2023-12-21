@@ -6,10 +6,28 @@ import {
 import {
   request
 } from '../../request/index';
+import * as echarts from '../../components/ec-canvas/echarts';
 const util = require('../../utils/util.js')
 // 引入SDK核心类
 var QQMapWX = require('../../libs/qqmap-wx-jssdk/qqmap-wx-jssdk');
 var qqmapsdk;
+
+let chart = null;
+
+
+function initChart(canvas, width, height, dpr) {
+  chart = echarts.init(canvas, null, {
+    width: width,
+    height: height,
+    devicePixelRatio: dpr // 像素
+  });
+  canvas.setChart(chart);
+
+  var option = {
+  };
+  chart.setOption(option);
+  return chart;
+}
 
 Page({
   data: {
@@ -23,7 +41,10 @@ Page({
     },
     hour_by_hour: [],
     day_by_day: [],
-    date_time_struct: {}
+    date_time_struct: {},
+    ec: {
+      onInit: initChart
+    }
   },
   //获得地图
   getMapLocation(e) {
@@ -119,6 +140,96 @@ Page({
       this.setData({
         hour_by_hour: { ...res.data }
       })
+      const x_arr = res.data.map(item => new Date(item.fxTime).getHours())
+      const temp_arr = res.data.map(item => parseInt(item.temp))
+      const pop_arr = res.data.map(item => {
+        const pop = item.pop;
+        if (pop) {
+          return parseInt(item.pop);
+        } else {
+          return 0;
+        }
+      })
+      chart.setOption({
+        title: {
+          text: '逐小时天气预报（24h）',
+          left: 'center',
+          top: 'top'
+        },
+        legend: {
+          data: ['温度', '降水概率'],
+          top: '12%'
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'cross' }
+        },
+        xAxis: {
+          type: 'category',
+          name: '\n\n时刻',
+          nameLocation: 'end',
+          nameGap: 7,
+          nameTextStyle: {
+            padding: [200, 0, 0, 0]
+          },
+          axisTick: {
+            alignWithLabel: true
+          },
+          data: x_arr
+        },
+        yAxis: [
+          {
+            type: 'value',
+            name: '降水概率',
+            position: 'right',
+            axisLabel: {
+              formatter: '{value} %'
+            }
+          },
+          {
+            type: 'value',
+            name: '温度',
+            position: 'left',
+            axisLabel: {
+              formatter: '{value} °C'
+            }
+          }
+        ],
+        series: [
+          {
+            name: '降水概率',
+            type: 'bar',
+            yAxisIndex: 0,
+            data: pop_arr,
+            // markPoint: {
+            //   data: [
+            //     { type: 'max', name: 'Max' },
+            //     { type: 'min', name: 'Min' }
+            //   ]
+            // },
+            // markLine: {
+            //   data: [{ type: 'average', name: 'Avg' }]
+            // },
+            smooth: true
+          },
+          {
+            name: '温度',
+            type: 'line',
+            data: temp_arr,
+            yAxisIndex: 1,
+            // markPoint: {
+            //   data: [
+            //     { type: 'max', name: 'Max' },
+            //     { type: 'min', name: 'Min' }
+            //   ]
+            // },
+            // markLine: {
+            //   data: [{ type: 'average', name: 'Avg' }]
+            // },
+            smooth: true
+          }
+        ]
+      })
     })
   },
   fetchDayByDayWeather(options) {
@@ -144,18 +255,24 @@ Page({
       pageY
     } = e.changedTouches[0];
     pageY = pageY * 0.97 - this.data.screenTop;
-    // 上滑
-    if (this.data.start_y > pageY) {
-      if (this.data.y != 0) {
+    if (Math.abs(pageY - this.data.start_y) > 30) {
+      // 上滑
+      if (this.data.start_y > pageY) {
+        if (this.data.y != 0) {
+          this.setData({
+            y: 0
+          })
+        }
+      }
+      // 下滑
+      if (this.data.start_y < pageY) {
         this.setData({
-          y: 0
+          y: this.data.max_y
         })
       }
-    }
-    // 下滑
-    if (this.data.start_y < pageY) {
+    } else {
       this.setData({
-        y: this.data.max_y
+        y: this.data.y
       })
     }
   },
@@ -319,7 +436,6 @@ Page({
     });
     wx.getSystemInfo({
       complete: (res) => {
-        console.log(res)
         this.setData({
           screenHeight: util.px2rpx(res.screenHeight, res.screenWidth),
           screenWidth: util.px2rpx(res.screenWidth, res.screenWidth),
