@@ -9,13 +9,13 @@ page {
 
 .top .search-content {
   width: 90%;
-  margin: 7rpx auto 0;
+  margin: 23rpx auto 0;
   display: flex;
   justify-content: center;
   align-items: center;
   background: rgb(244, 244, 244);
   color: rgb(143, 143, 143);
-  height: 70rpx;
+  height: 85rpx;
 }
 
 .top ._search_icon {
@@ -44,14 +44,14 @@ page {
 
 .option view {
   font-size: 32rpx;
-  height: 70rpx;
-  line-height: 70rpx;
+  height: 86rpx;
+  line-height: 86rpx;
   padding: 0 49rpx;
 }
 
 .search-result {
   position: absolute;
-  top: 76rpx;
+  top: 107rpx;
   left: 0;
   width: 100%;
 }
