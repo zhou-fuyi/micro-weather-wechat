@@ -45,7 +45,7 @@ page {
 .option view {
   font-size: 32rpx;
   height: 86rpx;
-  line-height: 86rpx;
+  line-height: 87rpx;
   padding: 0 49rpx;
 }
 
@@ -63,3 +63,30 @@ page {
 .hide {
   display: none;
 }
+
+/* 左滑删除 */
+.moveable-area {
+  height: 88rpx;
+  overflow-x: hidden;
+}
+
+.movable-view {
+  height: 88rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.follow-cities .del-btn {
+  height: 86rpx;
+  padding: 0;
+  line-height: 86rpx;
+  font-size: 32rpx;
+  background-color: #e64340;
+  color: #fff;
+}
+
+/* .del-btn-container {
+  height: 86rpx;
+  border-bottom: rgb(222, 222, 222) solid 1rpx;
+} */

@@ -6,13 +6,20 @@
     </view>
 </view>
 <view class="follow-cities" wx:if="{{city_panel_showed}}">
-    <view wx:for="{{follow_cities}}" wx:key="id">
-        <view class="option"  catchtap="toggleCity" data-division-id="{{item.divisionId}}">
-            <view>{{item.divisionName}}</view>
-            <view>{{item.divisionCode}}</view>
-            <!-- <view>{{item.grade}}</view> -->
-        </view>
-    </view>
+  <block wx:for="{{follow_cities}}" wx:key="id">
+        <movable-area class="moveable-area" style="width:{{screenWidth}}rpx">
+            <movable-view class="movable-view" style="width:{{screenWidth + delBtnWidth}}rpx" out-of-bounds="true" direction="horizontal" inertia="true" x="{{item.offset}}" data-id="{{item.id}}" bindtouchstart="slidingStart" bindtouchend="slidingEnd">
+                <view class="option" catchtap="toggleCity" data-division-id="{{item.divisionId}}" style="width:{{screenWidth}}rpx">
+                    <view>{{item.divisionName}}</view>
+                    <view>{{item.divisionCode}}</view>
+                    <!-- <view>{{item.grade}}</view> -->
+                </view>
+                <view class="del-btn-container" catchtap="unFollow" data-id="{{item.id}}">
+                    <button type="warn" class="del-btn" style="width: {{delBtnWidth}}rpx">删除</button>
+                </view>
+            </movable-view>
+        </movable-area>
+    </block>
 </view>
 <view class="search-result" wx:if="{{!city_panel_showed}}">
     <view wx:for="{{search_cities}}" wx:key="id">

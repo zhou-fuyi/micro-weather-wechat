@@ -16,7 +16,7 @@ Page({
     ...MAP_CONFIG,
     map_context: null,
     located: false,
-    district: {},
+    admin_division: {},
     weather_real_time: {
 
     },
@@ -43,8 +43,20 @@ Page({
             spatialCapable: false
           }
         }).then((res) => {
+          const follow_cities = this.data.follow_cities;
+          let followed = false;
+          if (follow_cities) {
+            follow_cities.forEach(city => {
+              if (city.divisionId = res.data[0].id) {
+                followed = true;
+              }
+            })
+          }
           this.setData({
-            district: res.data[0]
+            admin_division: {
+              ...res.data[0],
+              followed
+            }
           })
         })
         this.setData({
@@ -53,7 +65,10 @@ Page({
             longitude
           }
         });
-        this.fetchRealTimeWeather(longitude, latitude)
+        this.fetchRealTimeWeather({
+          longitude,
+          latitude
+        })
       },
       fail: (err) => {
         console.log(err)
@@ -64,12 +79,18 @@ Page({
     })
   },
   // 获取实时天气与空气质量
-  fetchRealTimeWeather(longitude, latitude) {
+  fetchRealTimeWeather(options) {
+    const {
+      longitude,
+      latitude
+    } = options
     let _location = '' + longitude + ',' + latitude;
     request({
       url: APP_CONFIG.apis.weather.real_time + _location,
     }).then((res) => {
-      const { updateTime } = res.data
+      const {
+        updateTime
+      } = res.data
       this.setData({
         weather_real_time: {
           ...res.data,
@@ -134,7 +155,10 @@ Page({
         success: res => {
           const _latitude = res.latitude;
           const _longitude = res.longitude;
-          const { latitude, longitude } = this.data.location
+          const {
+            latitude,
+            longitude
+          } = this.data.location
           if (latitude != _latitude || longitude != _longitude) {
             this.setData({
               located: false
@@ -145,30 +169,115 @@ Page({
 
     }
   },
+  onFollowCity(event) {
+    request({
+      url: APP_CONFIG.apis.follow_city.follow,
+      data: {
+        ...event.currentTarget.dataset
+      }
+    }).then(res => {
+      let follow_cities = this.data.follow_cities;
+      follow_cities.push({
+        ...res.data,
+        followed: true
+      })
+
+      this.setData({
+        follow_cities,
+        admin_division: {
+          ...this.data.admin_division,
+          followed: true
+        }
+      })
+    })
+  },
   // 切换城市
   acceptDataForSwitchCity(options) {
     console.log('accept data for switch city.')
     console.log(options)
-    const { coordinates } = options.data.centerPoint;
-    this.fetchRealTimeWeather(coordinates[0], coordinates[1])
+    const {
+      coordinates
+    } = options.data.centerPoint;
+    this.fetchRealTimeWeather({
+      longitude: coordinates[0],
+      latitude: coordinates[1]
+    })
     this.setData({
-      district: options.data,
+      admin_division: {
+        ...options.data,
+        followed: true
+      },
       location: {
         longitude: coordinates[0],
         latitude: coordinates[1]
       }
     })
   },
-  // 页面跳转，城市选择
+  followCitiesRefreshEvenHandler(options) {
+    const {
+      reflush
+    } = options;
+    if (reflush) {
+      request({
+        url: APP_CONFIG.apis.follow_city.list_by_subject_id
+      }).then(res => {
+        const cities = res.data;
+        const admin_division = this.data.admin_division
+        cities.forEach(city => {
+          if (admin_division.id === city.divisionId) {
+            admin_division.followed = false
+          }
+        })
+        if (cities) {
+          admin_division.followed = false
+        }
+        this.setData({
+          admin_division,
+          follow_cities: cities.map(city => ({
+            ...city,
+            followed: true
+          }))
+        })
+      })
+    }
+  },
+  // 页面跳转，城市选择, 消息通道绑定
   chooseCity(e) {
     console.log(e)
     console.log('页面跳转 --> city')
     wx.navigateTo({
       url: '../city/city',
       events: {
-        acceptDataFromOpenedPage: this.acceptDataForSwitchCity
+        acceptSwithCityData: this.acceptDataForSwitchCity,
+        refreshEvent: this.followCitiesRefreshEvenHandler,
       }
     })
+  },
+  // 刷新天气数据（根据当前地图中心点）
+  onWeatherflush(event) {
+    this.fetchRealTimeWeather(this.data.location)
+    this.animate('#icon-rotate-container', [{
+        rotate: 0
+      },
+      {
+        rotate: 90
+      },
+      {
+        rotate: 180
+      },
+      {
+        rotate: 270
+      },
+      {
+        rotate: 360
+      },
+    ], 1000, function () {
+      this.clearAnimation('#icon-rotate-container', {
+        rotate: true
+      }, function () {
+        console.log("清除了#icon-rotate-container上的otate属性")
+      })
+    }.bind(this))
   },
   onLoad() {
     this.getMapLocation();
@@ -189,6 +298,7 @@ Page({
         })
       },
     })
+    this.followCitiesRefreshEvenHandler({ reflush: true })
   },
 
 })

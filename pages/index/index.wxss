@@ -106,8 +106,14 @@ page {
     font-size: 45rpx;
 }
 
-.right text{
-    margin-left: 20rpx;
+.right, .right > view{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.right > text{
+  margin-right: 20rpx;
 }
 
 .right .time{

@@ -28,12 +28,14 @@
         <view class="_top">
           <view class="left">
             <view catchtap="chooseCity"><text class="iconfont icon-wei- plus"></text></view>
-            <text>{{district.name}}</text>
-            <text class="iconfont icon-31guanzhu1 attention"></text>
+            <text>{{admin_division.name}}</text>
+            <view style="{{admin_division.followed ? 'color: red' : ''}}" catchtap="onFollowCity" data-division-id="{{admin_division.id}}" data-division-code="{{admin_division.code}}" data-division-name="{{admin_division.name}}">
+              <text class="iconfont icon-31guanzhu1 attention"></text>
+              </view>
           </view>
           <view class="right">
             <text class="time">{{weather_real_time.hour}}:{{weather_real_time.minute}} 更新</text>
-            <text class="iconfont icon-shuaxin1"></text>
+            <view id="icon-rotate-container" catchtap="onWeatherflush"><text class="iconfont icon-shuaxin1"></text></view>
           </view>
         </view>
         <view class="_bottom">
