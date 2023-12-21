@@ -18,11 +18,12 @@ Page({
     located: false,
     admin_division: {},
     weather_real_time: {
-
     },
     air_real_time: {
-
-    }
+    },
+    hour_by_hour: [],
+    day_by_day: [],
+    date_time_struct: {}
   },
   //获得地图
   getMapLocation(e) {
@@ -47,7 +48,7 @@ Page({
           let followed = false;
           if (follow_cities) {
             follow_cities.forEach(city => {
-              if (city.divisionId = res.data[0].id) {
+              if (city.divisionId === res.data[0].id) {
                 followed = true;
               }
             })
@@ -69,6 +70,8 @@ Page({
           longitude,
           latitude
         })
+        this.fetchHourByHourWeather({ longitude, latitude })
+        this.fetchDayByDayWeather({ longitude, latitude })
       },
       fail: (err) => {
         console.log(err)
@@ -104,6 +107,28 @@ Page({
     }).then((res) => {
       this.setData({
         air_real_time: res.data
+      })
+    })
+  },
+  fetchHourByHourWeather(options) {
+    const { longitude, latitude } = options
+    let _location = '' + longitude + ',' + latitude;
+    request({
+      url: APP_CONFIG.apis.weather.hour_by_hour + _location,
+    }).then((res) => {
+      this.setData({
+        hour_by_hour: { ...res.data }
+      })
+    })
+  },
+  fetchDayByDayWeather(options) {
+    const { longitude, latitude } = options
+    let _location = '' + longitude + ',' + latitude;
+    request({
+      url: APP_CONFIG.apis.weather.day_by_day + _location,
+    }).then((res) => {
+      this.setData({
+        day_by_day: { ...res.data }
       })
     })
   },
@@ -202,6 +227,8 @@ Page({
       longitude: coordinates[0],
       latitude: coordinates[1]
     })
+    this.fetchHourByHourWeather({ longitude: coordinates[0], latitude: coordinates[1] })
+    this.fetchDayByDayWeather({ longitude: coordinates[0], latitude: coordinates[1] })
     this.setData({
       admin_division: {
         ...options.data,
@@ -210,7 +237,8 @@ Page({
       location: {
         longitude: coordinates[0],
         latitude: coordinates[1]
-      }
+      },
+      date_time_struct: util.deconstructionTime(new Date())
     })
   },
   followCitiesRefreshEvenHandler(options) {
@@ -223,14 +251,12 @@ Page({
       }).then(res => {
         const cities = res.data;
         const admin_division = this.data.admin_division
+        admin_division.followed = false;
         cities.forEach(city => {
           if (admin_division.id === city.divisionId) {
-            admin_division.followed = false
+            admin_division.followed = true
           }
         })
-        if (cities) {
-          admin_division.followed = false
-        }
         this.setData({
           admin_division,
           follow_cities: cities.map(city => ({
@@ -255,6 +281,9 @@ Page({
   },
   // 刷新天气数据（根据当前地图中心点）
   onWeatherflush(event) {
+    this.setData({
+      date_time_struct: util.deconstructionTime(new Date())
+    })
     this.fetchRealTimeWeather(this.data.location)
     this.animate('#icon-rotate-container', [{
         rotate: 0
@@ -280,6 +309,9 @@ Page({
     }.bind(this))
   },
   onLoad() {
+    this.setData({
+      date_time_struct: util.deconstructionTime(new Date())
+    })
     this.getMapLocation();
     // 实例化API核心类
     qqmapsdk = new QQMapWX({
