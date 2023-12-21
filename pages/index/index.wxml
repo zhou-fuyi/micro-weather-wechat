@@ -1,6 +1,6 @@
-<!--index.wxml-->
+<!-- index.wxml -->
 <view id="map-container">
-  <map id="qq_map_wx"  latitude="{{location.latitude}}" longitude="{{location.longitude}}" show-location="{{showLocation}}" show-compass="{{showCompass}}" show-scale="{{showScale}}" scale="{{scale}}" subkey="{{key}}" layer-style="{{style}}" bindregionchange="onChangeRegion"></map>
+  <map id="qq_map_wx" latitude="{{location.latitude}}" longitude="{{location.longitude}}" show-location="{{showLocation}}" show-compass="{{showCompass}}" show-scale="{{showScale}}" scale="{{scale}}" subkey="{{key}}" layer-style="{{style}}" bindregionchange="onChangeRegion"></map>
 </view>
 <!-- 上层页面 start -->
 <view class="left-container">
@@ -22,47 +22,72 @@
 <view class="bottom-container">
   <!-- <view class="bottom-bottom-container"></view>
   <view class="bottom-top-container"></view> -->
-  <movable-area class="moveable-area" style="height:{{screenHeight * 2}}rpx">
+  <movable-area class="moveable-area" style="height:{{screenHeight * 2.7}}rpx">
     <movable-view class="moveable-view" direction="vertical" inertia="false" damping="70" out-of-bounds="true" y="{{y}}" style="width:{{screenWidth}}rpx;height:{{screenHeight}}rpx" bindtouchstart="slidingStart" bindtouchend="slidingEnd">
       <view class="bo-top-container">
         <view class="_top">
           <view class="left">
-            <view catchtap="chooseCity"><text class="iconfont icon-wei- plus"></text></view>
+            <view catchtap="chooseCity">
+              <text class="iconfont icon-wei- plus"></text>
+            </view>
             <text>{{admin_division.name}}</text>
             <view style="{{admin_division.followed ? 'color: red' : ''}}" catchtap="onFollowCity" data-division-id="{{admin_division.id}}" data-division-code="{{admin_division.code}}" data-division-name="{{admin_division.name}}">
               <text class="iconfont icon-31guanzhu1 attention"></text>
-              </view>
+            </view>
           </view>
           <view class="right">
-            <text class="time">{{weather_real_time.hour}}:{{weather_real_time.minute < 10 ? '0' + weather_real_time.minute: weather_real_time.minute}} 更新</text>
-            <view id="icon-rotate-container" catchtap="onWeatherflush"><text class="iconfont icon-shuaxin1"></text></view>
+            <text class="time">
+              {{weather_real_time.hour < 10 ? '0' + weather_real_time.hour : weather_real_time.hour}}:{{weather_real_time.minute < 10 ? '0' + weather_real_time.minute: weather_real_time.minute}} 更新 </text>
+                <view id="icon-rotate-container" catchtap="onWeatherflush">
+                  <text class="iconfont icon-shuaxin1"></text>
+                </view>
           </view>
         </view>
         <view class="_bottom">
           <view class="temperature">
             <text id="temperature">{{weather_real_time.temp}}</text>
           </view>
-          <view class="unit">
-            <text class="iconfont icon-morenyuanquan"></text>
-          </view>
-          <view class="middle">
-            <text>{{weather_real_time.text}}</text>
-            <view class="aqi">
-              <text>AQI {{air_real_time.category}}</text>
+          <view class="other">
+            <view class="unit">
+              <text class="iconfont icon-morenyuanquan"></text>
+              <view class="middle">
+                <text>{{weather_real_time.text}}</text>
+                <view class="aqi">
+                  <text>AQI {{air_real_time.category}}</text>
+                </view>
+              </view>
+              <view class="wind">
+                <text>{{weather_real_time.windDir}}{{weather_real_time.windScale}}级</text>
+              </view>
             </view>
-          </view>
-          <view class="wind">
-            <text>{{weather_real_time.windDir}}{{weather_real_time.windScale}}级</text>
           </view>
         </view>
       </view>
       <view class="bo-other-container">
         <view class="description">
-          <text>{{ date_time_struct.hour > 17 ? '今天' + day_by_day[0].textDay : '今晚' + day_by_day[0].textNight }}。明天{{day_by_day[1].textDay}}，最低温为{{day_by_day[1].tempMin}}度，最高温为{{day_by_day[1].tempMax}}度。</text>
-          <view class="line"></view>
+          <text>
+            {{ date_time_struct.hour < 17 ? '今天' + day_by_day[0].textDay : '今晚' + day_by_day[0].textNight }}，最低温{{day_by_day[0].tempMin}}度，最高温{{day_by_day[0].tempMax}}度。明天{{day_by_day[1].textDay}}，最低温{{day_by_day[1].tempMin}}度，最高温{{day_by_day[1].tempMax}}度。
+          </text>
         </view>
+        <view class="line"></view>
         <view class="hour_forecast">
           <ec-canvas id="24h" canvas-id="24h-canvas" ec="{{ec}}"></ec-canvas>
+        </view>
+        <view class="day_forecast">
+          <view wx:for="{{day_by_day}}" wx:key="fxDate" class="option">
+            <text>{{item.day_of_week}}</text>
+            <view class="day">
+              <text> 白天</text>
+              <text class="{{ 'qi-' + item.iconDay}}"></text>
+              <text>{{item.textDay}}</text>
+            </view>
+            <view class="night">
+              <text>晚间</text>
+              <text class="{{ 'qi-' + item.iconNight}}"></text>
+              <text>{{item.iconNight}}</text>
+            </view>
+            <view class="last"><text>{{item.tempMax}}° / {{item.tempMin}}°</text></view>
+          </view>
         </view>
       </view>
     </movable-view>

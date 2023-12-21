@@ -9,6 +9,7 @@
   box-sizing: border-box;
 }  */
 @import "./styles/fonts/font_3165785_cy4jdkq82fw.wxss";
+@import "./styles/fonts/qweather-icons.wxss";
 
 page view {
     margin: 0;

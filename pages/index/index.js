@@ -228,7 +228,11 @@ Page({
             // },
             smooth: true
           }
-        ]
+        ],
+        grid: {
+          top: '30%',
+          bottom: '13%'
+        }
       })
     })
   },
@@ -239,7 +243,14 @@ Page({
       url: APP_CONFIG.apis.weather.day_by_day + _location,
     }).then((res) => {
       this.setData({
-        day_by_day: { ...res.data }
+        day_by_day: { ...res.data.map(item => {
+          if(new Date().getDate() === new Date(item.fxDate).getDate()){
+            item.day_of_week = '今天'
+          }else {
+            item.day_of_week = util.dayOfTheWeek(item.fxDate)
+          }
+          return item
+        }) }
       })
     })
   },
@@ -402,6 +413,8 @@ Page({
       date_time_struct: util.deconstructionTime(new Date())
     })
     this.fetchRealTimeWeather(this.data.location)
+    this.fetchHourByHourWeather(this.data.location)
+    this.fetchDayByDayWeather(this.data.location)
     this.animate('#icon-rotate-container', [{
         rotate: 0
       },

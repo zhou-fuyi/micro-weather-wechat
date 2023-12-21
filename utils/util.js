@@ -48,8 +48,19 @@ const deconstructionTime = (time_str) => {
   }
 }
 
+const _week_day = '日一二三四五六';
+
+const dayOfTheWeek = (time_str) => {
+  let date = new Date();
+  if (time_str) {
+    date = new Date(time_str)
+  }
+  return '周' + _week_day.charAt(date.getDay())
+}
+
 module.exports = {
   formatTime,
   px2rpx,
-  deconstructionTime
+  deconstructionTime,
+  dayOfTheWeek
 }
