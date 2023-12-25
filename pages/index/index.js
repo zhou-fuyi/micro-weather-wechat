@@ -11,6 +11,7 @@ const util = require('../../utils/util.js')
 // 引入SDK核心类
 var QQMapWX = require('../../libs/qqmap-wx-jssdk/qqmap-wx-jssdk');
 var qqmapsdk;
+let _charts = [];
 
 function setOption(chart, args) {
   const {
@@ -98,6 +99,22 @@ function setOption(chart, args) {
   chart.setOption(option)
 }
 
+function initChart(canvas, width, height, dpr) {
+  const _chart = echarts.init(canvas, null, {
+    width: width,
+    height: height,
+    devicePixelRatio: dpr // 像素
+  });
+  canvas.setChart(_chart);
+  setOption(_chart, {})
+
+  _charts.push({
+    canvas_id: parseInt(canvas.canvasId),
+    chart: _chart
+  })
+  return _chart
+}
+
 Page({
   data: {
     ...MAP_CONFIG,
@@ -110,38 +127,39 @@ Page({
     day_by_day: [],
     date_time_struct: {},
     ec: {
-      // onInit: initChart
+      onInit: initChart
       // 将 lazyLoad 设为 true 后，需要手动初始化图表
-      lazyLoad: true
+      // lazyLoad: true
     },
     movable_view_direction: 'vertical',
     scroll_view_disabled: false,
-    scroll_view_sliding: false
+    scroll_view_sliding: false,
+    swiper_index: 0
   },
   // 点击按钮后初始化图表
-  initChart: function (args) {
-    this.ecComponent.init((canvas, width, height, dpr) => {
-      // 获取组件的 canvas、width、height 后的回调函数
-      // 在这里初始化图表
-      const chart = echarts.init(canvas, null, {
-        width: width,
-        height: height,
-        devicePixelRatio: dpr // 像素
-      });
-      setOption(chart, args);
+  // initChart: function (args) {
+  //   this.ecComponent.init((canvas, width, height, dpr) => {
+  //     // 获取组件的 canvas、width、height 后的回调函数
+  //     // 在这里初始化图表
+  //     const chart = echarts.init(canvas, null, {
+  //       width: width,
+  //       height: height,
+  //       devicePixelRatio: dpr // 像素
+  //     });
+  //     setOption(chart, args);
 
-      // 将图表实例绑定到 this 上，可以在其他成员函数（如 dispose）中访问
-      this.chart = chart;
+  //     // 将图表实例绑定到 this 上，可以在其他成员函数（如 dispose）中访问
+  //     this.chart = chart;
 
-      this.setData({
-        isLoaded: true,
-        isDisposed: false
-      });
+  //     this.setData({
+  //       isLoaded: true,
+  //       isDisposed: false
+  //     });
 
-      // 注意这里一定要返回 chart 实例，否则会影响事件处理等
-      return chart;
-    });
-  },
+  //     // 注意这里一定要返回 chart 实例，否则会影响事件处理等
+  //     return chart;
+  //   });
+  // },
   //获得地图
   getMapLocation(e) {
     wx.getLocation({
@@ -164,17 +182,26 @@ Page({
           const follow_cities = this.data.follow_cities;
           let followed = false;
           if (follow_cities) {
-            follow_cities.forEach(city => {
-              if (city.divisionId === res.data[0].id) {
-                followed = true;
+            const first_city = res.data[0];
+            follow_cities.forEach((city, index, object) => {
+              if (city.divisionId === first_city.id) {
+                followed = true
+                object.splice(index, 1)
               }
+            })
+            follow_cities.unshift({
+              followed,
+              divisionId: first_city.id,
+              divisionName: first_city.name,
+              divisionCode: first_city.code
             })
           }
           this.setData({
             admin_division: {
               ...res.data[0],
               followed
-            }
+            },
+            follow_cities
           })
         })
         this.setData({
@@ -257,10 +284,16 @@ Page({
           return 0;
         }
       })
-      this.initChart({
-        x_arr,
-        pop_arr,
-        temp_arr
+
+      this.data.follow_cities.forEach((city, index, object) => {
+        if (city.divisionId === this.data.admin_division.id) {
+          setOption(_charts[index].chart, {
+            x_arr,
+            pop_arr,
+            temp_arr
+          })
+          return
+        }
       })
     })
   },
@@ -329,6 +362,29 @@ Page({
       located: true
     })
   },
+  swiperChangeHandler(event) {
+    if (event.detail.source === 'touch') {
+      const id = parseInt(event.detail.currentItemId);
+      request({
+        url: APP_CONFIG.apis.admin_division.query_by_id + id,
+      }).then(res => {
+
+        let followed = false;
+        this.data.follow_cities.forEach(city => {
+          if (city.divisionId === id) {
+            followed = true
+          }
+        })
+        this.acceptDataForSwitchCity({
+          data: {
+            ...res.data,
+            followed,
+            swiper_index: event.detail.current
+          }
+        })
+      })
+    }
+  },
   // 监听视野变化
   onChangeRegion(event) {
     // 当前事件中没有causeBy属性
@@ -387,28 +443,37 @@ Page({
     const {
       coordinates
     } = options.data.centerPoint;
-    this.fetchRealTimeWeather({
-      longitude: coordinates[0],
-      latitude: coordinates[1]
-    })
-    this.fetchHourByHourWeather({
-      longitude: coordinates[0],
-      latitude: coordinates[1]
-    })
-    this.fetchDayByDayWeather({
-      longitude: coordinates[0],
-      latitude: coordinates[1]
-    })
+    const follow_cities = this.data.follow_cities
+    if (options.data.switch_to_top) {
+      follow_cities.forEach((city, index, object) => {
+        if (city.divisionId === options.data.id) {
+          object.splice(index, 1)
+        }
+      })
+      follow_cities.unshift({
+        followed: options.data.followed,
+        divisionId: options.data.id,
+        divisionName: options.data.name,
+        divisionCode: options.data.code
+      })
+    }
     this.setData({
       admin_division: {
-        ...options.data,
-        followed: true
+        ...options.data
       },
       location: {
         longitude: coordinates[0],
         latitude: coordinates[1]
       },
+      follow_cities,
       date_time_struct: util.deconstructionTime(new Date())
+    })
+    this.fetchRealTimeWeather({ longitude: coordinates[0], latitude: coordinates[1] })
+    this.fetchHourByHourWeather({ longitude: coordinates[0], latitude: coordinates[1] })
+    this.fetchDayByDayWeather({ longitude: coordinates[0], latitude: coordinates[1] })
+    // 必须先完成跳转页面数据设定动作，最后进行跳转索引设置，避免swiper前后来回跳转导致未能达到正确的页面跳转效果问题
+    this.setData({
+      swiper_index: options.data.swiper_index,
     })
   },
   followCitiesRefreshEvenHandler(options) {
@@ -420,13 +485,21 @@ Page({
         url: APP_CONFIG.apis.follow_city.list_by_subject_id
       }).then(res => {
         const cities = res.data;
-        const admin_division = this.data.admin_division
-        admin_division.followed = false;
-        cities.forEach(city => {
-          if (admin_division.id === city.divisionId) {
-            admin_division.followed = true
+        let admin_division = this.data.admin_division
+        if (Object.keys(admin_division).length === 0) {
+          admin_division = {
+            id: res.data[0].divisionId,
+            name: res.data[0].divisionName,
+            code: res.data[0].divisionCode
           }
-        })
+        } else {
+          admin_division.followed = false;
+          cities.forEach(city => {
+            if (admin_division.id === city.divisionId) {
+              admin_division.followed = true
+            }
+          })
+        }
         this.setData({
           admin_division,
           follow_cities: cities.map(city => ({
@@ -535,15 +608,13 @@ Page({
         })
       },
     })
-    this.followCitiesRefreshEvenHandler({
-      reflush: true
-    })
+    this.followCitiesRefreshEvenHandler({ reflush: true, init_charts: true })
   },
   /**
    * 生命周期函数--监听页面初次渲染完成
    */
   onReady: function () {
     // 获取组件
-    this.ecComponent = this.selectComponent('#hour_forecast');
+    this.getMapLocation();
   },
 })

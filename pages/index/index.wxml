@@ -25,87 +25,90 @@
   </view>
 </view>
 <view class="bottom-container">
-  <!-- <view class="bottom-bottom-container"></view>
-  <view class="bottom-top-container"></view> -->
   <movable-area class="moveable-area" style="height:{{windowHeight * 2}}px">
     <movable-view class="moveable-view" direction="{{movable_view_direction}}" inertia="false" damping="70" out-of-bounds="true" y="{{y}}" style="width:{{screenWidth}}rpx;height:{{windowHeight}}px" bindtouchstart="slidingStart" bindtouchend="slidingEnd">
-      <view class="bo-top-container">
-        <view class="_top">
-          <view class="left">
-            <view catchtap="chooseCity">
-              <text class="iconfont icon-wei- plus"></text>
-            </view>
-            <text>{{admin_division.name}}</text>
-            <view style="{{admin_division.followed ? 'color: red' : ''}}" catchtap="onFollowCity" data-division-id="{{admin_division.id}}" data-division-code="{{admin_division.code}}" data-division-name="{{admin_division.name}}">
-              <text class="iconfont icon-31guanzhu1 attention"></text>
-            </view>
-          </view>
-          <view class="right">
-            <text class="time">
-              {{weather_real_time.hour < 10 ? '0' + weather_real_time.hour : weather_real_time.hour}}:{{weather_real_time.minute < 10 ? '0' + weather_real_time.minute: weather_real_time.minute}} 更新 </text>
-                <view id="icon-rotate-container" catchtap="onWeatherflush">
-                  <text class="iconfont icon-shuaxin1"></text>
+      <swiper class="swiper-container" indicator-dots="{{true}}" current="{{swiper_index}}" duration="500" bindchange="swiperChangeHandler">
+        <block wx:for="{{follow_cities}}" wx:key="*this">
+          <swiper-item item-id="{{item.districtId}}">
+            <view class="bo-top-container">
+              <view class="_top">
+                <view class="left">
+                  <view catchtap="chooseCity">
+                    <text class="iconfont icon-wei- plus"></text>
+                  </view>
+                  <text>{{district.name}}</text>
+                  <view style="{{district.followed ? 'color: red' : ''}}" catchtap="onFollowCity" data-district-id="{{district.id}}" data-district-code="{{district.code}}" data-district-name="{{district.name}}">
+                    <text class="iconfont icon-31guanzhu1 attention"></text>
+                  </view>
                 </view>
-          </view>
-        </view>
-        <view class="_bottom">
-          <view class="temperature">
-            <text id="temperature">{{weather_real_time.temp}}</text>
-          </view>
-          <view class="other">
-            <view class="unit">
-              <text class="iconfont icon-morenyuanquan"></text>
-              <view class="middle">
-                <text>{{weather_real_time.text}}</text>
-                <view class="aqi">
-                  <text>AQI {{air_real_time.category}}</text>
+                <view class="right">
+                  <text class="time">{{weather_real_time.hour < 10 ? '0' + weather_real_time.hour : weather_real_time.hour}}:{{weather_real_time.minute < 10 ? '0' + weather_real_time.minute: weather_real_time.minute}} 更新</text>
+                      <view id="icon-rotate-container" catchtap="onWeatherflush">
+                        <text class="iconfont icon-shuaxin1"></text>
+                      </view>
                 </view>
               </view>
-              <view class="wind">
-                <text>{{weather_real_time.windDir}}{{weather_real_time.windScale}}级</text>
+              <view class="_bottom">
+                <view class="temperature">
+                  <text id="temperature">{{weather_real_time.temp}}</text>
+                </view>
+                <view class="other">
+                  <view class="unit">
+                    <text class="iconfont icon-morenyuanquan"></text>
+                  </view>
+                  <view class="middle">
+                    <text>{{weather_real_time.text}}</text>
+                    <view class="aqi">
+                      <text>AQI {{air_real_time.category}}</text>
+                    </view>
+                  </view>
+                  <view class="wind">
+                    <text>{{weather_real_time.windDir}}{{weather_real_time.windScale}}级</text>
+                  </view>
+                </view>
               </view>
             </view>
-          </view>
-        </view>
-      </view>
-      <scroll-view scroll-y="{{scroll_view_disabled}}" enhanced="true" style="height:{{0.77 * windowHeight}}px" bindscroll="scroll" binddragend="dragEndHandler" bindscrolltoupper="scrollToUpperHandler" bindscrolltolower="scrollToLowerHandler">
-        <view class="bo-other-container" style="height:{{windowHeight}}px">
-          <view class="description">
-            <text>{{ date_time_struct.hour < 17 ? '今天' + day_by_day[0].textDay : '今晚' + day_by_day[0].textNight }}，温度{{day_by_day[0].tempMin}}-{{day_by_day[0].tempMax}}度；能见度{{day_by_day[0].vis}}公里。明天{{day_by_day[1].textDay}}，温度{{day_by_day[1].tempMin}}-{{day_by_day[1].tempMax}}度；能见度{{day_by_day[1].vis}}公里。</text>
-          </view>
-          <view class="line"></view>
-          <view class="hour_forecast">
-            <ec-canvas id="hour_forecast" canvas-id="24h-canvas" ec="{{ec}}"></ec-canvas>
-          </view>
-          <view class="day_forecast">
-            <view class="title">
-              <text>未来预报（7d）</text>
-            </view>
-            <view wx:for="{{day_by_day}}" wx:key="fxDate" class="option">
-              <text>{{item.day_of_week}}</text>
-              <view class="day">
-                <text> 白天</text>
-                <text class="{{ 'qi-' + item.iconDay}}"></text>
-                <text>{{item.textDay}}</text>
+            <scroll-view scroll-y="{{scroll_view_disabled}}" enhanced="true" style="height:{{0.77 * windowHeight}}px" bindscroll="scroll" binddragend="dragEndHandler" bindscrolltoupper="scrollToUpperHandler" bindscrolltolower="scrollToLowerHandler">
+              <view class="bo-other-container" style="height:{{windowHeight}}px">
+                <view class="description">
+                  <text>{{ date_time_struct.hour < 17 ? '今天' + day_by_day[0].textDay : '今晚' + day_by_day[0].textNight }}，温度{{day_by_day[0].tempMin}}-{{day_by_day[0].tempMax}}度；能见度{{day_by_day[0].vis}}公里。明天{{day_by_day[1].textDay}}，温度{{day_by_day[1].tempMin}}-{{day_by_day[1].tempMax}}度；能见度{{day_by_day[1].vis}}公里。</text>
+                </view>
+                <view class="line"></view>
+                <view class="hour_forecast">
+                  <ec-canvas id="{{item.districtId}}" canvas-id="{{item.districtId}}" ec="{{ec}}"></ec-canvas>
+                </view>
+                <view class="day_forecast">
+                  <view class="title">
+                    <text>未来预报（7d）</text>
+                  </view>
+                  <view wx:for="{{day_by_day}}" wx:key="fxDate" class="option">
+                    <text>{{item.day_of_week}}</text>
+                    <view class="day">
+                      <text> 白天</text>
+                      <text class="{{ 'qi-' + item.iconDay}}"></text>
+                      <text>{{item.textDay}}</text>
+                    </view>
+                    <view class="night">
+                      <text>晚间</text>
+                      <text class="{{ 'qi-' + item.iconNight}}"></text>
+                      <text>{{item.textNight}}</text>
+                    </view>
+                    <view class="last"><text>{{item.tempMax}}° / {{item.tempMin}}°</text></view>
+                  </view>
+                </view>
+                <view class="footer-container">
+                  <view class="footer">
+                    <view class="footer_links">
+                      <navigator url="javascript:">数据由和风天气提供</navigator>
+                    </view>
+                    <view class="footer_text">Copyright © weather.zhoujian.site 2022-{{date_time_struct.year}}</view>
+                  </view>
+                </view>
               </view>
-              <view class="night">
-                <text>晚间</text>
-                <text class="{{ 'qi-' + item.iconNight}}"></text>
-                <text>{{item.textNight}}</text>
-              </view>
-              <view class="last"><text>{{item.tempMax}}° / {{item.tempMin}}°</text></view>
-            </view>
-          </view>
-          <view class="footer-container">
-            <view class="footer">
-              <view class="footer_links">
-                <navigator url="javascript:">数据由和风天气提供</navigator>
-              </view>
-              <view class="footer_text">Copyright &copy; 2022-{{date_time_struct.year}} weather.zhoujian.site</view>
-            </view>
-          </view>
-        </view>
-      </scroll-view>
+            </scroll-view>
+          </swiper-item>
+        </block>
+      </swiper>
     </movable-view>
   </movable-area>
 </view>

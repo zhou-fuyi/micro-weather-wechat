@@ -71,7 +71,9 @@ Page({
       // })
       // 通知地图页面进行刷新
       const eventChannel = this.getOpenerEventChannel()
-      eventChannel.emit('refreshEvent', { reflush: true })
+      eventChannel.emit('refreshEvent', {
+        reflush: true
+      })
       // 切回地图页面
       this.backup(event.currentTarget.dataset.divisionId)
     })
@@ -86,7 +88,14 @@ Page({
     }).then(res => {
       const eventChannel = this.getOpenerEventChannel()
       eventChannel.emit('acceptSwithCityData', {
-        data: res.data
+        data: {
+          ...res.data,
+          ...{
+            followed: true,
+            switch_to_top: true,
+            swiper_index: 0
+          }
+        }
       })
       wx.navigateBack({
         delta: 1
@@ -95,7 +104,9 @@ Page({
   },
   unFollow(event) {
     console.log(event)
-    const { id } = event.currentTarget.dataset;
+    const {
+      id
+    } = event.currentTarget.dataset;
     request({
       url: APP_CONFIG.apis.follow_city.un_follow + id,
       method: "DELETE"
@@ -110,7 +121,9 @@ Page({
         follow_cities
       })
       const eventChannel = this.getOpenerEventChannel()
-      eventChannel.emit('refreshEvent', { reflush: true })
+      eventChannel.emit('refreshEvent', {
+        reflush: true
+      })
     })
   },
   slidingStart(e) {
@@ -127,8 +140,12 @@ Page({
   },
   slidingEnd(e) {
     console.log(e)
-    const { id } = e.currentTarget.dataset
-    let { pageX } = e.changedTouches[0];
+    const {
+      id
+    } = e.currentTarget.dataset
+    let {
+      pageX
+    } = e.changedTouches[0];
     const abs = Math.abs(pageX - this.data.start_x)
     let offset_x = 0;
     let cities = this.data.follow_cities;
@@ -184,7 +201,12 @@ Page({
     }).then((res) => {
       console.log(res)
       this.setData({
-        follow_cities: res.data.map(x => ({ ...x, ...{ offset: 0 } }))
+        follow_cities: res.data.map(x => ({
+          ...x,
+          ...{
+            offset: 0
+          }
+        }))
       })
     })
   },
