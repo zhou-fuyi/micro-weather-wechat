@@ -9,21 +9,26 @@
   </view>
 </view>
 <view class="right-container">
-  <view class="menu">
-    <text class="iconfont icon-caidan"></text>
-  </view>
-  <view class="layer">
-    <text class="iconfont icon-tuceng"></text>
-  </view>
-  <view class="location {{located ? 'location-hover' : ''}}" bindtap="locationTap">
-    <text class="iconfont icon-dingweiweizhi"></text>
+  <view class="right-container-wrapper">
+    <view class="menu">
+      <text class="iconfont icon-caidan"></text>
+    </view>
+    <view class="layer">
+      <text class="iconfont icon-tuceng"></text>
+    </view>
+    <view class="share">
+      <text class="iconfont icon-fenxiang1"></text>
+    </view>
+    <view class="location {{located ? 'location-hover' : ''}}" bindtap="locationTap">
+      <text class="iconfont icon-dingweiweizhi"></text>
+    </view>
   </view>
 </view>
 <view class="bottom-container">
   <!-- <view class="bottom-bottom-container"></view>
   <view class="bottom-top-container"></view> -->
-  <movable-area class="moveable-area" style="height:{{screenHeight * 2}}rpx">
-    <movable-view class="moveable-view" direction="vertical" inertia="false" damping="70" out-of-bounds="true" y="{{y}}" style="width:{{screenWidth}}rpx;height:{{screenHeight}}rpx" bindtouchstart="slidingStart" bindtouchend="slidingEnd">
+  <movable-area class="moveable-area" style="height:{{windowHeight * 2}}px">
+    <movable-view class="moveable-view" direction="{{movable_view_direction}}" inertia="false" damping="70" out-of-bounds="true" y="{{y}}" style="width:{{screenWidth}}rpx;height:{{windowHeight}}px" bindtouchstart="slidingStart" bindtouchend="slidingEnd">
       <view class="bo-top-container">
         <view class="_top">
           <view class="left">
@@ -63,43 +68,19 @@
           </view>
         </view>
       </view>
-      <!--<view class="bo-other-container">
-        <view class="description">
-          <text>
-            {{ date_time_struct.hour < 17 ? '今天' + day_by_day[0].textDay : '今晚' + day_by_day[0].textNight }}，最低温{{day_by_day[0].tempMin}}度，最高温{{day_by_day[0].tempMax}}度。明天{{day_by_day[1].textDay}}，最低温{{day_by_day[1].tempMin}}度，最高温{{day_by_day[1].tempMax}}度。
-          </text>
-        </view>
-        <view class="line"></view>
-        <view class="hour_forecast">
-          <ec-canvas id="24h" canvas-id="24h-canvas" ec="{{ec}}"></ec-canvas>
-        </view>
-        <view class="day_forecast">
-          <view wx:for="{{day_by_day}}" wx:key="fxDate" class="option">
-            <text>{{item.day_of_week}}</text>
-            <view class="day">
-              <text> 白天</text>
-              <text class="{{ 'qi-' + item.iconDay}}"></text>
-              <text>{{item.textDay}}</text>
-            </view>
-            <view class="night">
-              <text>晚间</text>
-              <text class="{{ 'qi-' + item.iconNight}}"></text>
-              <text>{{item.iconNight}}</text>
-            </view>
-            <view class="last"><text>{{item.tempMax}}° / {{item.tempMin}}°</text></view>
-          </view>
-        </view>
-      </view> -->
-      <scroll-view scroll-y="true" style="height:{{screenHeight * 2 - 230}}rpx">
-        <view class="bo-other-container" style="height:{{screenHeight}}rpx">
+      <scroll-view scroll-y="{{scroll_view_disabled}}" enhanced="true" style="height:{{0.77 * windowHeight}}px" bindscroll="scroll" binddragend="dragEndHandler" bindscrolltoupper="scrollToUpperHandler" bindscrolltolower="scrollToLowerHandler">
+        <view class="bo-other-container" style="height:{{windowHeight}}px">
           <view class="description">
-            <text>{{ date_time_struct.hour < 17 ? '今天' + day_by_day[0].textDay : '今晚' + day_by_day[0].textNight }}，最低温{{day_by_day[0].tempMin}}度，最高温{{day_by_day[0].tempMax}}度。明天{{day_by_day[1].textDay}}，最低温{{day_by_day[1].tempMin}}度，最高温{{day_by_day[1].tempMax}}度。</text>
+            <text>{{ date_time_struct.hour < 17 ? '今天' + day_by_day[0].textDay : '今晚' + day_by_day[0].textNight }}，温度{{day_by_day[0].tempMin}}-{{day_by_day[0].tempMax}}度；能见度{{day_by_day[0].vis}}公里。明天{{day_by_day[1].textDay}}，温度{{day_by_day[1].tempMin}}-{{day_by_day[1].tempMax}}度；能见度{{day_by_day[1].vis}}公里。</text>
           </view>
           <view class="line"></view>
           <view class="hour_forecast">
-            <ec-canvas id="24h" canvas-id="24h-canvas" ec="{{ec}}"></ec-canvas>
+            <ec-canvas id="hour_forecast" canvas-id="24h-canvas" ec="{{ec}}"></ec-canvas>
           </view>
           <view class="day_forecast">
+            <view class="title">
+              <text>未来预报（7d）</text>
+            </view>
             <view wx:for="{{day_by_day}}" wx:key="fxDate" class="option">
               <text>{{item.day_of_week}}</text>
               <view class="day">
@@ -110,9 +91,17 @@
               <view class="night">
                 <text>晚间</text>
                 <text class="{{ 'qi-' + item.iconNight}}"></text>
-                <text>{{item.iconNight}}</text>
+                <text>{{item.textNight}}</text>
               </view>
               <view class="last"><text>{{item.tempMax}}° / {{item.tempMin}}°</text></view>
+            </view>
+          </view>
+          <view class="footer-container">
+            <view class="footer">
+              <view class="footer_links">
+                <navigator url="javascript:">数据由和风天气提供</navigator>
+              </view>
+              <view class="footer_text">Copyright &copy; 2022-{{date_time_struct.year}} weather.zhoujian.site</view>
             </view>
           </view>
         </view>

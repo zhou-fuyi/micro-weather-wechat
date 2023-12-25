@@ -37,10 +37,18 @@ page {
 .right-container {
   position: absolute;
   top: 40rpx;
-  right: 16rpx;
+  height: 55%;
+  right: 20rpx;
 }
 
-.right-container view {
+.right-container-wrapper {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.right-container-wrapper view {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,7 +57,11 @@ page {
   border: white solid 1rpx;
   border-radius: 50%;
   background-color: white;
-  margin-bottom: 20rpx;
+  margin-bottom: 30rpx;
+}
+
+.right-container-wrapper .location {
+  margin-top: auto;
 }
 
 .right-container text {
@@ -82,8 +94,9 @@ page {
 .bo-top-container {
   display: flex;
   flex-direction: column;
-  width: 80%;
-  height: 230rpx;
+  width: 90%;
+  height: 20%;
+  box-sizing: border-box;
   margin: 0 auto;
   background-color: rgb(29, 34, 40, .9);
   color: white;
@@ -203,6 +216,10 @@ page {
 
 /* other start */
 
+scroll-view {
+  background-color: white;
+}
+
 .bo-other-container {
   display: flex;
   flex-direction: column;
@@ -215,11 +232,11 @@ page {
 }
 
 .bo-other-container .description {
-    /* margin-top: 25rpx; */
-    padding: 0 5%;
-    display: flex;
-    align-items: center;
-    height: 100rpx;
+  /* margin-top: 25rpx; */
+  padding: 0 5%;
+  display: flex;
+  align-items: center;
+  height: 110rpx;
 }
 
 .line {
@@ -232,7 +249,7 @@ page {
 
 .hour_forecast {
   width: 100%;
-  height: 25%;
+  height: 33%;
   margin: 20rpx auto 0;
 }
 
@@ -248,31 +265,64 @@ ec-canvas {
   width: 100%;
   height: 100%;
   position: relative;
+  top: 20rpx;
 }
 
 .day_forecast {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
+  margin-top: 36rpx;
+}
+
+.day_forecast .title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 35rpx;
+  font-family: "monospace";
+  color: rgb(72, 72, 72);
 }
 
 .day_forecast .option {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10rpx 30rpx;
-    height: 70rpx;
-    border-bottom: rgb(219, 219, 219) solid 1rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10rpx 30rpx;
+  height: 70rpx;
+  border-bottom: rgb(219, 219, 219) solid 1rpx;
 }
 
 .day_forecast .option view {
-    display: flex;
-    align-items: baseline;
+  display: flex;
+  align-items: baseline;
 }
 
 .day_forecast .option .last {
-    font-size: 30rpx;
+  font-size: 30rpx;
 }
 
-.day_forecast .day text, .day_forecast .night text {
-    margin-left: 9rpx;
+.day_forecast .day text,
+.day_forecast .night text {
+  margin-left: 9rpx;
+}
+
+.footer-container {
+  margin-top: auto;
+  justify-self: flex-end;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 26rpx;
+}
+
+.footer_links {
+  color: rgb(97, 106, 139);
+}
+
+.footer_text {
+  color: rgb(111, 111, 111);
 }

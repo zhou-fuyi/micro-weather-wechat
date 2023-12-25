@@ -12,21 +12,90 @@ const util = require('../../utils/util.js')
 var QQMapWX = require('../../libs/qqmap-wx-jssdk/qqmap-wx-jssdk');
 var qqmapsdk;
 
-let chart = null;
-
-
-function initChart(canvas, width, height, dpr) {
-  chart = echarts.init(canvas, null, {
-    width: width,
-    height: height,
-    devicePixelRatio: dpr // 像素
-  });
-  canvas.setChart(chart);
-
-  var option = {
-  };
-  chart.setOption(option);
-  return chart;
+function setOption(chart, args) {
+  const {
+    x_arr,
+    pop_arr,
+    temp_arr
+  } = args
+  const option = {
+    title: {
+      text: '逐小时天气预报（24h）',
+      left: 'center',
+      top: 'top',
+      textStyle: {
+        fontWeight: "lighter",
+        color: 'rgba(72, 72, 72, 1)',
+        fontStyle: "normal",
+        fontFamily: "monospace",
+        textShadowColor: "transparent"
+      }
+    },
+    legend: {
+      data: ['温度', '降水概率'],
+      top: '12%'
+    },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'cross'
+      }
+    },
+    xAxis: {
+      type: 'category',
+      name: '\n\n时刻',
+      nameLocation: 'end',
+      nameGap: 7,
+      nameTextStyle: {
+        padding: [200, 0, 0, 0]
+      },
+      axisTick: {
+        alignWithLabel: true
+      },
+      data: x_arr
+    },
+    yAxis: [{
+        type: 'value',
+        name: '降水概率',
+        position: 'right',
+        min: 0,
+        max: 100,
+        axisLabel: {
+          formatter: '{value} %'
+        }
+      },
+      {
+        type: 'value',
+        name: '温度',
+        position: 'left',
+        axisLabel: {
+          formatter: '{value} °C'
+        }
+      }
+    ],
+    series: [{
+        name: '降水概率',
+        type: 'bar',
+        yAxisIndex: 0,
+        data: pop_arr,
+        smooth: true
+      },
+      {
+        name: '温度',
+        type: 'line',
+        data: temp_arr,
+        yAxisIndex: 1,
+        smooth: true
+      }
+    ],
+    grid: {
+      top: '30%',
+      bottom: '13%',
+      left: '13%',
+      right: '13%'
+    }
+  }
+  chart.setOption(option)
 }
 
 Page({
@@ -35,16 +104,43 @@ Page({
     map_context: null,
     located: false,
     admin_division: {},
-    weather_real_time: {
-    },
-    air_real_time: {
-    },
+    weather_real_time: {},
+    air_real_time: {},
     hour_by_hour: [],
     day_by_day: [],
     date_time_struct: {},
     ec: {
-      onInit: initChart
-    }
+      // onInit: initChart
+      // 将 lazyLoad 设为 true 后，需要手动初始化图表
+      lazyLoad: true
+    },
+    movable_view_direction: 'vertical',
+    scroll_view_disabled: false,
+    scroll_view_sliding: false
+  },
+  // 点击按钮后初始化图表
+  initChart: function (args) {
+    this.ecComponent.init((canvas, width, height, dpr) => {
+      // 获取组件的 canvas、width、height 后的回调函数
+      // 在这里初始化图表
+      const chart = echarts.init(canvas, null, {
+        width: width,
+        height: height,
+        devicePixelRatio: dpr // 像素
+      });
+      setOption(chart, args);
+
+      // 将图表实例绑定到 this 上，可以在其他成员函数（如 dispose）中访问
+      this.chart = chart;
+
+      this.setData({
+        isLoaded: true,
+        isDisposed: false
+      });
+
+      // 注意这里一定要返回 chart 实例，否则会影响事件处理等
+      return chart;
+    });
   },
   //获得地图
   getMapLocation(e) {
@@ -91,8 +187,14 @@ Page({
           longitude,
           latitude
         })
-        this.fetchHourByHourWeather({ longitude, latitude })
-        this.fetchDayByDayWeather({ longitude, latitude })
+        this.fetchHourByHourWeather({
+          longitude,
+          latitude
+        })
+        this.fetchDayByDayWeather({
+          longitude,
+          latitude
+        })
       },
       fail: (err) => {
         console.log(err)
@@ -132,13 +234,18 @@ Page({
     })
   },
   fetchHourByHourWeather(options) {
-    const { longitude, latitude } = options
+    const {
+      longitude,
+      latitude
+    } = options
     let _location = '' + longitude + ',' + latitude;
     request({
       url: APP_CONFIG.apis.weather.hour_by_hour + _location,
     }).then((res) => {
       this.setData({
-        hour_by_hour: { ...res.data }
+        hour_by_hour: {
+          ...res.data
+        }
       })
       const x_arr = res.data.map(item => new Date(item.fxTime).getHours())
       const temp_arr = res.data.map(item => parseInt(item.temp))
@@ -150,109 +257,33 @@ Page({
           return 0;
         }
       })
-      chart.setOption({
-        title: {
-          text: '逐小时天气预报（24h）',
-          left: 'center',
-          top: 'top'
-        },
-        legend: {
-          data: ['温度', '降水概率'],
-          top: '12%'
-        },
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: { type: 'cross' }
-        },
-        xAxis: {
-          type: 'category',
-          name: '\n\n时刻',
-          nameLocation: 'end',
-          nameGap: 7,
-          nameTextStyle: {
-            padding: [200, 0, 0, 0]
-          },
-          axisTick: {
-            alignWithLabel: true
-          },
-          data: x_arr
-        },
-        yAxis: [
-          {
-            type: 'value',
-            name: '降水概率',
-            position: 'right',
-            min: 0, 
-            max: 100,
-            axisLabel: {
-              formatter: '{value} %'
-            }
-          },
-          {
-            type: 'value',
-            name: '温度',
-            position: 'left',
-            axisLabel: {
-              formatter: '{value} °C'
-            }
-          }
-        ],
-        series: [
-          {
-            name: '降水概率',
-            type: 'bar',
-            yAxisIndex: 0,
-            data: pop_arr,
-            // markPoint: {
-            //   data: [
-            //     { type: 'max', name: 'Max' },
-            //     { type: 'min', name: 'Min' }
-            //   ]
-            // },
-            // markLine: {
-            //   data: [{ type: 'average', name: 'Avg' }]
-            // },
-            smooth: true
-          },
-          {
-            name: '温度',
-            type: 'line',
-            data: temp_arr,
-            yAxisIndex: 1,
-            // markPoint: {
-            //   data: [
-            //     { type: 'max', name: 'Max' },
-            //     { type: 'min', name: 'Min' }
-            //   ]
-            // },
-            // markLine: {
-            //   data: [{ type: 'average', name: 'Avg' }]
-            // },
-            smooth: true
-          }
-        ],
-        grid: {
-          top: '30%',
-          bottom: '13%'
-        }
+      this.initChart({
+        x_arr,
+        pop_arr,
+        temp_arr
       })
     })
   },
   fetchDayByDayWeather(options) {
-    const { longitude, latitude } = options
+    const {
+      longitude,
+      latitude
+    } = options
     let _location = '' + longitude + ',' + latitude;
     request({
       url: APP_CONFIG.apis.weather.day_by_day + _location,
     }).then((res) => {
       this.setData({
-        day_by_day: { ...res.data.map(item => {
-          if(new Date().getDate() === new Date(item.fxDate).getDate()){
-            item.day_of_week = '今天'
-          }else {
-            item.day_of_week = util.dayOfTheWeek(item.fxDate)
-          }
-          return item
-        }) }
+        day_by_day: {
+          ...res.data.map(item => {
+            if (new Date().getDate() === new Date(item.fxDate).getDate()) {
+              item.day_of_week = '今天'
+            } else {
+              item.day_of_week = util.dayOfTheWeek(item.fxDate)
+            }
+            return item
+          })
+        }
       })
     })
   },
@@ -268,19 +299,22 @@ Page({
       pageY
     } = e.changedTouches[0];
     pageY = pageY * 0.97 - this.data.screenTop;
-    if (Math.abs(pageY - this.data.start_y) > 30) {
+    const disabled = this.data.scroll_view_sliding
+    if (!disabled && Math.abs(pageY - this.data.start_y) > 30) {
       // 上滑
       if (this.data.start_y > pageY) {
         if (this.data.y != 0) {
           this.setData({
-            y: 0
+            y: 0,
+            scroll_view_disabled: true
           })
         }
       }
       // 下滑
       if (this.data.start_y < pageY) {
         this.setData({
-          y: this.data.max_y
+          y: this.data.max_y,
+          scroll_view_disabled: false
         })
       }
     } else {
@@ -357,8 +391,14 @@ Page({
       longitude: coordinates[0],
       latitude: coordinates[1]
     })
-    this.fetchHourByHourWeather({ longitude: coordinates[0], latitude: coordinates[1] })
-    this.fetchDayByDayWeather({ longitude: coordinates[0], latitude: coordinates[1] })
+    this.fetchHourByHourWeather({
+      longitude: coordinates[0],
+      latitude: coordinates[1]
+    })
+    this.fetchDayByDayWeather({
+      longitude: coordinates[0],
+      latitude: coordinates[1]
+    })
     this.setData({
       admin_division: {
         ...options.data,
@@ -440,6 +480,39 @@ Page({
       })
     }.bind(this))
   },
+  dragEndHandler(event) {
+    console.log(event)
+    // this.setData({
+    //   scroll_view_sliding: true
+    // })
+  },
+  scroll(event) {
+    console.log(event)
+  },
+  scrollToUpperHandler(event) {
+    console.log(event)
+    this.setData({
+      scroll_view_sliding: false
+    })
+  },
+  scrollToLowerHandler(event) {
+    console.log(event)
+    this.setData({
+      scroll_view_sliding: true
+    })
+  },
+  onShareAppMessage: res => {
+    return {
+      title: 'Fuyi Weather 可以在微信小程序中使用啦！',
+      path: '/pages/map/main-map',
+      success: function (res) {
+        console.log(res)
+      },
+      fail: function (err) {
+        console.log(err)
+      }
+    }
+  },
   onLoad() {
     this.setData({
       date_time_struct: util.deconstructionTime(new Date())
@@ -456,12 +529,21 @@ Page({
           screenWidth: util.px2rpx(res.screenWidth, res.screenWidth),
           screenTop: res.screenTop ? res.screenTop : 0,
           originScreenHeight: res.screenHeight,
-          y: 0.67 * res.windowHeight,
-          max_y: 0.67 * res.windowHeight
+          windowHeight: res.windowHeight,
+          y: 0.608 * res.windowHeight,
+          max_y: 0.608 * res.windowHeight
         })
       },
     })
-    this.followCitiesRefreshEvenHandler({ reflush: true })
+    this.followCitiesRefreshEvenHandler({
+      reflush: true
+    })
   },
-
+  /**
+   * 生命周期函数--监听页面初次渲染完成
+   */
+  onReady: function () {
+    // 获取组件
+    this.ecComponent = this.selectComponent('#hour_forecast');
+  },
 })
