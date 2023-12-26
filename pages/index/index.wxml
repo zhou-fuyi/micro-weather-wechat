@@ -36,8 +36,8 @@
                   <view catchtap="chooseCity">
                     <text class="iconfont icon-wei- plus"></text>
                   </view>
-                  <text>{{district.name}}</text>
-                  <view style="{{district.followed ? 'color: red' : ''}}" catchtap="onFollowCity" data-district-id="{{district.id}}" data-district-code="{{district.code}}" data-district-name="{{district.name}}">
+                  <text>{{admin_division.name}}</text>
+                  <view style="{{admin_division.followed ? 'color: red' : ''}}" catchtap="onFollowCity" data-division-id="{{admin_division.id}}" data-division-code="{{admin_division.code}}" data-division-name="{{admin_division.name}}">
                     <text class="iconfont icon-31guanzhu1 attention"></text>
                   </view>
                 </view>

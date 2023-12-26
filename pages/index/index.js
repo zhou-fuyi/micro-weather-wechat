@@ -121,6 +121,7 @@ Page({
     map_context: null,
     located: false,
     admin_division: {},
+    located_admin_division: {},
     weather_real_time: {},
     air_real_time: {},
     hour_by_hour: [],
@@ -136,30 +137,6 @@ Page({
     scroll_view_sliding: false,
     swiper_index: 0
   },
-  // 点击按钮后初始化图表
-  // initChart: function (args) {
-  //   this.ecComponent.init((canvas, width, height, dpr) => {
-  //     // 获取组件的 canvas、width、height 后的回调函数
-  //     // 在这里初始化图表
-  //     const chart = echarts.init(canvas, null, {
-  //       width: width,
-  //       height: height,
-  //       devicePixelRatio: dpr // 像素
-  //     });
-  //     setOption(chart, args);
-
-  //     // 将图表实例绑定到 this 上，可以在其他成员函数（如 dispose）中访问
-  //     this.chart = chart;
-
-  //     this.setData({
-  //       isLoaded: true,
-  //       isDisposed: false
-  //     });
-
-  //     // 注意这里一定要返回 chart 实例，否则会影响事件处理等
-  //     return chart;
-  //   });
-  // },
   //获得地图
   getMapLocation(e) {
     wx.getLocation({
@@ -179,7 +156,7 @@ Page({
             spatialCapable: false
           }
         }).then((res) => {
-          const follow_cities = this.data.follow_cities;
+          let follow_cities = this.data.follow_cities;
           let followed = false;
           if (follow_cities) {
             const first_city = res.data[0];
@@ -195,14 +172,23 @@ Page({
               divisionName: first_city.name,
               divisionCode: first_city.code
             })
+          }else {
+            follow_cities = [{
+              followed,
+              divisionId: res.data[0].id,
+              divisionName: res.data[0].name,
+              divisionCode: res.data[0].code
+            }]
           }
           this.setData({
             admin_division: {
               ...res.data[0],
               followed
             },
+            located_admin_division: { ...res.data[0] },
             follow_cities
           })
+          this.fetchHourByHourWeather({ longitude, latitude })
         })
         this.setData({
           location: {
@@ -214,10 +200,7 @@ Page({
           longitude,
           latitude
         })
-        this.fetchHourByHourWeather({
-          longitude,
-          latitude
-        })
+
         this.fetchDayByDayWeather({
           longitude,
           latitude
@@ -487,18 +470,18 @@ Page({
         const cities = res.data;
         let admin_division = this.data.admin_division
         if (Object.keys(admin_division).length === 0) {
-          admin_division = {
-            id: res.data[0].divisionId,
-            name: res.data[0].divisionName,
-            code: res.data[0].divisionCode
-          }
+          admin_division = this.data.located_admin_division
         } else {
           admin_division.followed = false;
-          cities.forEach(city => {
-            if (admin_division.id === city.divisionId) {
-              admin_division.followed = true
-            }
-          })
+          if(cities.length > 0){
+            cities.forEach(city => {
+              if (admin_division.id === city.divisionId) {
+                admin_division.followed = true
+              }
+            })
+          }else{
+            cities.push(this.data.located_admin_division)
+          }
         }
         this.setData({
           admin_division,
@@ -614,7 +597,6 @@ Page({
    * 生命周期函数--监听页面初次渲染完成
    */
   onReady: function () {
-    // 获取组件
-    this.getMapLocation();
+    this.followCitiesRefreshEvenHandler({ reflush: true, init_charts: true })
   },
 })
