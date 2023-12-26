@@ -1,6 +1,6 @@
 <!-- index.wxml -->
 <view id="map-container">
-  <map id="qq_map_wx" latitude="{{location.latitude}}" longitude="{{location.longitude}}" show-location="{{showLocation}}" show-compass="{{showCompass}}" show-scale="{{showScale}}" scale="{{scale}}" subkey="{{key}}" layer-style="{{style}}" bindregionchange="onChangeRegion"></map>
+  <map id="qq_map_wx" latitude="{{location.latitude}}" longitude="{{location.longitude}}" show-location="{{showLocation}}" show-compass="{{showCompass}}" show-scale="{{showScale}}" scale="{{scale}}" subkey="{{key}}" layer-style="{{style}}" bindregionchange="onChangeRegion" bindtap="onTapMap"></map>
 </view>
 <!-- 上层页面 start -->
 <view class="left-container">

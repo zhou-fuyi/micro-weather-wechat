@@ -189,7 +189,8 @@ Page({
             located_admin_division: {
               ...res.data[0]
             },
-            city_list
+            city_list,
+            swiper_index: 0
           })
           this.fetchHourByHourWeather({
             longitude,
@@ -219,6 +220,21 @@ Page({
         })
       }
     })
+  },
+  // 点击地图事件
+	onTapMap (event) {
+    const {longitude, latitude} = event.detail
+    request({
+      url: APP_CONFIG.apis.admin_division.spatial_lookup,
+          data: {
+            location: 'POINT(' + longitude + ' ' + latitude + ')',
+            spatialCapable: true
+          }
+    }).then(res => {
+      this.acceptDataForSwitchCity({data: {...res.data[0], switch_to_top: true}})
+    })
+
+    console.log(`经度：${longitude}，维度：${latitude}`)
   },
   // 获取实时天气与空气质量
   fetchRealTimeWeather(options) {
