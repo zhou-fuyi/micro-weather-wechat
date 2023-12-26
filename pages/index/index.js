@@ -122,6 +122,7 @@ Page({
     located: false,
     admin_division: {},
     located_admin_division: {},
+    city_list: [],
     weather_real_time: {},
     air_real_time: {},
     hour_by_hour: [],
@@ -153,27 +154,27 @@ Page({
           url: APP_CONFIG.apis.admin_division.spatial_lookup,
           data: {
             location: 'POINT(' + longitude + ' ' + latitude + ')',
-            spatialCapable: false
+            spatialCapable: true
           }
         }).then((res) => {
-          let follow_cities = this.data.follow_cities;
+          let city_list = this.data.city_list;
           let followed = false;
-          if (follow_cities) {
+          if (city_list.length > 0) {
             const first_city = res.data[0];
-            follow_cities.forEach((city, index, object) => {
+            city_list.forEach((city, index, object) => {
               if (city.divisionId === first_city.id) {
-                followed = true
+                followed = city.followed
                 object.splice(index, 1)
               }
             })
-            follow_cities.unshift({
+            city_list.unshift({
               followed,
               divisionId: first_city.id,
               divisionName: first_city.name,
               divisionCode: first_city.code
             })
-          }else {
-            follow_cities = [{
+          } else {
+            city_list = [{
               followed,
               divisionId: res.data[0].id,
               divisionName: res.data[0].name,
@@ -185,10 +186,15 @@ Page({
               ...res.data[0],
               followed
             },
-            located_admin_division: { ...res.data[0] },
-            follow_cities
+            located_admin_division: {
+              ...res.data[0]
+            },
+            city_list
           })
-          this.fetchHourByHourWeather({ longitude, latitude })
+          this.fetchHourByHourWeather({
+            longitude,
+            latitude
+          })
         })
         this.setData({
           location: {
@@ -268,7 +274,7 @@ Page({
         }
       })
 
-      this.data.follow_cities.forEach((city, index, object) => {
+      this.data.city_list.forEach((city, index, object) => {
         if (city.divisionId === this.data.admin_division.id) {
           setOption(_charts[index].chart, {
             x_arr,
@@ -353,9 +359,9 @@ Page({
       }).then(res => {
 
         let followed = false;
-        this.data.follow_cities.forEach(city => {
+        this.data.city_list.forEach(city => {
           if (city.divisionId === id) {
-            followed = true
+            followed = city.followed
           }
         })
         this.acceptDataForSwitchCity({
@@ -401,17 +407,23 @@ Page({
     request({
       url: APP_CONFIG.apis.follow_city.follow,
       data: {
-        ...event.currentTarget.dataset
+        ...event.currentTarget.dataset,
+        state: 'Focus'
       }
     }).then(res => {
-      let follow_cities = this.data.follow_cities;
-      follow_cities.push({
+      let city_list = this.data.city_list;
+      city_list.forEach((city, index, object) => {
+        if (city.divisionId === res.data.divisionId) {
+          object.splice(index, 1)
+        }
+      })
+      city_list.unshift({
         ...res.data,
         followed: true
       })
 
       this.setData({
-        follow_cities,
+        city_list,
         admin_division: {
           ...this.data.admin_division,
           followed: true
@@ -426,14 +438,15 @@ Page({
     const {
       coordinates
     } = options.data.centerPoint;
-    const follow_cities = this.data.follow_cities
+    const city_list = this.data.city_list
+    // 将切换的城市置顶
     if (options.data.switch_to_top) {
-      follow_cities.forEach((city, index, object) => {
+      city_list.forEach((city, index, object) => {
         if (city.divisionId === options.data.id) {
           object.splice(index, 1)
         }
       })
-      follow_cities.unshift({
+      city_list.unshift({
         followed: options.data.followed,
         divisionId: options.data.id,
         divisionName: options.data.name,
@@ -448,12 +461,21 @@ Page({
         longitude: coordinates[0],
         latitude: coordinates[1]
       },
-      follow_cities,
+      city_list,
       date_time_struct: util.deconstructionTime(new Date())
     })
-    this.fetchRealTimeWeather({ longitude: coordinates[0], latitude: coordinates[1] })
-    this.fetchHourByHourWeather({ longitude: coordinates[0], latitude: coordinates[1] })
-    this.fetchDayByDayWeather({ longitude: coordinates[0], latitude: coordinates[1] })
+    this.fetchRealTimeWeather({
+      longitude: coordinates[0],
+      latitude: coordinates[1]
+    })
+    this.fetchHourByHourWeather({
+      longitude: coordinates[0],
+      latitude: coordinates[1]
+    })
+    this.fetchDayByDayWeather({
+      longitude: coordinates[0],
+      latitude: coordinates[1]
+    })
     // 必须先完成跳转页面数据设定动作，最后进行跳转索引设置，避免swiper前后来回跳转导致未能达到正确的页面跳转效果问题
     this.setData({
       swiper_index: options.data.swiper_index,
@@ -467,28 +489,54 @@ Page({
       request({
         url: APP_CONFIG.apis.follow_city.list_by_subject_id
       }).then(res => {
-        const cities = res.data;
+        const followed_cities = res.data;
         let admin_division = this.data.admin_division
-        if (Object.keys(admin_division).length === 0) {
-          admin_division = this.data.located_admin_division
-        } else {
-          admin_division.followed = false;
-          if(cities.length > 0){
-            cities.forEach(city => {
-              if (admin_division.id === city.divisionId) {
-                admin_division.followed = true
+        let city_list = Object.values(this.data.city_list).filter(city => (!city.followed))
+        admin_division.followed = false;
+        if (followed_cities.length > 0) {
+          admin_division = {
+            id: followed_cities[0].divisionId,
+            code: followed_cities[0].divisionId,
+            name: followed_cities[0].divisionName,
+            followed: true
+          }
+          followed_cities.forEach(city => {
+            city_list.forEach((inner_city, index, object) => {
+              if (city.divisionId === inner_city.divisionId) {
+                object.splice(index, 1)
               }
             })
-          }else{
-            cities.push(this.data.located_admin_division)
+          })
+
+        }
+        if (city_list.length === 0 && followed_cities.length === 0 && Object.keys(this.data.located_admin_division).length > 0) {
+          city_list.push({
+            divisionId: this.data.located_admin_division.id,
+            divisionName: this.data.located_admin_division.name,
+            divisionCode: this.data.located_admin_division.code,
+            followed: false
+          })
+          admin_division = {
+            ...this.data.located_admin_division,
+            followed: admin_division.followed
           }
         }
+        const cities = [...city_list, ...followed_cities.map(city => ({
+          ...city,
+          followed: true
+        }))]
         this.setData({
-          admin_division,
-          follow_cities: cities.map(city => ({
-            ...city,
-            followed: true
-          }))
+          city_list: cities
+        })
+        request({
+          url: APP_CONFIG.apis.admin_division.query_by_id + admin_division.id,
+        }).then(res => {
+          this.setData({
+            admin_division: {
+              ...res.data,
+              followed: admin_division.followed
+            },
+          })
         })
       })
     }
@@ -570,10 +618,12 @@ Page({
     }
   },
   onLoad() {
-    this.setData({
-      date_time_struct: util.deconstructionTime(new Date())
-    })
+    this.followCitiesRefreshEvenHandler({ reflush: true, init_charts: true })
     this.getMapLocation();
+    this.setData({
+      date_time_struct: util.deconstructionTime(new Date()),
+      city_list: wx.getStorageSync(APP_CONFIG.constants.followed_cities)
+    })
     // 实例化API核心类
     qqmapsdk = new QQMapWX({
       key: this.data.key
@@ -591,12 +641,27 @@ Page({
         })
       },
     })
-    this.followCitiesRefreshEvenHandler({ reflush: true, init_charts: true })
+    this.followCitiesRefreshEvenHandler({
+      reflush: true,
+      init_charts: true
+    })
   },
   /**
    * 生命周期函数--监听页面初次渲染完成
    */
   onReady: function () {
-    this.followCitiesRefreshEvenHandler({ reflush: true, init_charts: true })
+    this.followCitiesRefreshEvenHandler({
+      reflush: true,
+      init_charts: true
+    })
+  },
+    /**
+   * 生命周期函数--监听页面显示
+   */
+  onShow: function () {
+
+    if(this.data.district && this.data.district.centerPoint){
+      this.acceptDataForSwitchCity({data: {...this.data.district}})
+    }
   },
 })

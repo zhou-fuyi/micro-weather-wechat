@@ -60,7 +60,8 @@ Page({
     request({
       url: APP_CONFIG.apis.follow_city.follow,
       data: {
-        ...event.currentTarget.dataset
+        ...event.currentTarget.dataset,
+        state: 'Focus'
       }
     }).then((res) => {
       this.clearInput()

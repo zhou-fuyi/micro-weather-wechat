@@ -28,16 +28,16 @@
   <movable-area class="moveable-area" style="height:{{windowHeight * 2}}px">
     <movable-view class="moveable-view" direction="{{movable_view_direction}}" inertia="false" damping="70" out-of-bounds="true" y="{{y}}" style="width:{{screenWidth}}rpx;height:{{windowHeight}}px" bindtouchstart="slidingStart" bindtouchend="slidingEnd">
       <swiper class="swiper-container" indicator-dots="{{true}}" current="{{swiper_index}}" duration="500" bindchange="swiperChangeHandler">
-        <block wx:for="{{follow_cities}}" wx:key="*this">
-          <swiper-item item-id="{{item.districtId}}">
+        <block wx:for="{{city_list}}" wx:key="index">
+          <swiper-item item-id="{{item.divisionId}}">
             <view class="bo-top-container">
               <view class="_top">
                 <view class="left">
                   <view catchtap="chooseCity">
                     <text class="iconfont icon-wei- plus"></text>
                   </view>
-                  <text>{{admin_division.name}}</text>
-                  <view style="{{admin_division.followed ? 'color: red' : ''}}" catchtap="onFollowCity" data-division-id="{{admin_division.id}}" data-division-code="{{admin_division.code}}" data-division-name="{{admin_division.name}}">
+                  <text>{{item.divisionName}}</text>
+                  <view style="{{item.followed ? 'color: red' : ''}}" catchtap="onFollowCity" data-division-id="{{item.divisionId}}" data-division-code="{{item.divisionCode}}" data-division-name="{{item.divisionName}}">
                     <text class="iconfont icon-31guanzhu1 attention"></text>
                   </view>
                 </view>
