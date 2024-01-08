@@ -62,7 +62,8 @@ Page({
       data: {
         ...event.currentTarget.dataset,
         state: 'Focus'
-      }
+      },
+      method: 'POST'
     }).then((res) => {
       this.clearInput()
       // this.setData({

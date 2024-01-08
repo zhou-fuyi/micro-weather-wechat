@@ -58,9 +58,30 @@ const dayOfTheWeek = (time_str) => {
   return '周' + _week_day.charAt(date.getDay())
 }
 
+const _aqi_category = ['优', '良', '轻微污染', '轻度污染', '中度污染', '重污染'];
+const _aqi_color = [
+  [50, 205, 50],
+  [255, 215, 0],
+  [255, 126, 0],
+  [255, 0, 0],
+  [153, 0, 76],
+  [126, 0, 35]
+]
+const getAqiColor = aqi => {
+  let color = []
+  for (var index = 0; index < _aqi_category.length; index++) {
+    if (_aqi_category[index] === aqi) {
+      color = _aqi_color[index]
+      break
+    }
+  }
+  return color
+}
+
 module.exports = {
   formatTime,
   px2rpx,
   deconstructionTime,
-  dayOfTheWeek
+  dayOfTheWeek,
+  getAqiColor
 }

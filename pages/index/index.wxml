@@ -3,20 +3,20 @@
   <map id="qq_map_wx" latitude="{{location.latitude}}" longitude="{{location.longitude}}" show-location="{{showLocation}}" show-compass="{{showCompass}}" show-scale="{{showScale}}" scale="{{scale}}" subkey="{{key}}" layer-style="{{style}}" bindregionchange="onChangeRegion" bindtap="onTapMap"></map>
 </view>
 <!-- 上层页面 start -->
-<view class="left-container">
+<view class="left-container" hover-class="hover">
   <view class="notice">
     <text class="iconfont icon-lingdang"></text>
   </view>
 </view>
 <view class="right-container">
   <view class="right-container-wrapper">
-    <view class="menu">
+    <view class="menu" hover-class="hover">
       <text class="iconfont icon-caidan"></text>
     </view>
-    <view class="layer">
+    <view class="layer" hover-class="hover">
       <text class="iconfont icon-tuceng"></text>
     </view>
-    <view class="share">
+    <view class="share" hover-class="hover" bindtap="onWeatherShare">
       <text class="iconfont icon-fenxiang1"></text>
     </view>
     <view class="location {{located ? 'location-hover' : ''}}" bindtap="locationTap">

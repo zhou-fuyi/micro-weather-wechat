@@ -222,19 +222,64 @@ Page({
     })
   },
   // 点击地图事件
-	onTapMap (event) {
-    const {longitude, latitude} = event.detail
+  onTapMap(event) {
+    const {
+      longitude,
+      latitude
+    } = event.detail
     request({
       url: APP_CONFIG.apis.admin_division.spatial_lookup,
-          data: {
-            location: 'POINT(' + longitude + ' ' + latitude + ')',
-            spatialCapable: true
-          }
+      data: {
+        location: 'POINT(' + longitude + ' ' + latitude + ')',
+        spatialCapable: true
+      }
     }).then(res => {
-      this.acceptDataForSwitchCity({data: {...res.data[0], switch_to_top: true}})
+      this.acceptDataForSwitchCity({
+        data: {
+          ...res.data[0],
+          switch_to_top: true
+        }
+      })
     })
 
     console.log(`经度：${longitude}，维度：${latitude}`)
+  },
+  onWeatherShare(event) {
+    console.log(event)
+    this.mapCtx.getRegion({
+      success: res => {
+        console.log(res)
+        const bounds = `${res.southwest.latitude},${res.southwest.longitude};${res.northeast.latitude},${res.northeast.longitude}`
+        const wind = `${this.data.weather_real_time.windDir}${this.data.weather_real_time.windScale}级`
+        const center = `${this.data.location.latitude},${this.data.location.longitude}`
+        request({
+          url: APP_CONFIG.apis.poster.weather,
+          data: {
+            bounds,
+            location: this.data.admin_division.name,
+            temperature: this.data.weather_real_time.temp,
+            text: this.data.weather_real_time.text,
+            wind,
+            aqi: this.data.air_real_time.category,
+            aqiColor: util.getAqiColor(this.data.air_real_time.category),
+            center
+          },
+          method: 'POST'
+        }).then(res => {
+          console.log(res)
+          wx.previewImage({
+            current: res.data,
+            urls: [res.data]
+          })
+        })
+      },
+      fail: err => {
+        wx.showToast({
+          title: '分享失败',
+          icon: 'error'
+        })
+      }
+    })
   },
   // 获取实时天气与空气质量
   fetchRealTimeWeather(options) {
@@ -394,14 +439,7 @@ Page({
   onChangeRegion(event) {
     // 当前事件中没有causeBy属性
     if (event.type === 'end' && this.data.located) {
-      const mapCtx = wx.createMapContext('qq_map_wx', this);
-      // if (!mapCtx) {
-      //   mapCtx = wx.createMapContext('qq_map_wx', this)
-      //   this.setData({
-      //     map_context: mapCtx
-      //   })
-      // }
-      mapCtx.getCenterLocation({
+      this.mapCtx.getCenterLocation({
         success: res => {
           const _latitude = res.latitude;
           const _longitude = res.longitude;
@@ -425,7 +463,8 @@ Page({
       data: {
         ...event.currentTarget.dataset,
         state: 'Focus'
-      }
+      },
+      method: 'POST'
     }).then(res => {
       let city_list = this.data.city_list;
       city_list.forEach((city, index, object) => {
@@ -623,8 +662,8 @@ Page({
   },
   onShareAppMessage: res => {
     return {
-      title: 'Fuyi Weather 可以在微信小程序中使用啦！',
-      path: '/pages/map/main-map',
+      title: 'Fuyi Weather 一个结合地理信息的天气小程序！',
+      path: '/pages/index/index',
       success: function (res) {
         console.log(res)
       },
@@ -633,8 +672,18 @@ Page({
       }
     }
   },
+  onShareTimeline: function () {
+    return {
+      title: 'Fuyi Weather',
+      query: {},
+      imageUrl: ''
+    }
+  },
   onLoad() {
-    this.followCitiesRefreshEvenHandler({ reflush: true, init_charts: true })
+    this.followCitiesRefreshEvenHandler({
+      reflush: true,
+      init_charts: true
+    })
     this.getMapLocation();
     this.setData({
       date_time_struct: util.deconstructionTime(new Date()),
@@ -670,14 +719,23 @@ Page({
       reflush: true,
       init_charts: true
     })
+    this.mapCtx = wx.createMapContext('qq_map_wx', this);
+    wx.showShareMenu({
+      withShareTicket: true,
+      menus: ['shareAppMessage', 'shareTimeline']
+    })
   },
-    /**
+  /**
    * 生命周期函数--监听页面显示
    */
   onShow: function () {
 
-    if(this.data.district && this.data.district.centerPoint){
-      this.acceptDataForSwitchCity({data: {...this.data.district}})
+    if (this.data.admin_division && this.data.admin_division.centerPoint) {
+      this.acceptDataForSwitchCity({
+        data: {
+          ...this.data.admin_division
+        }
+      })
     }
   },
 })
