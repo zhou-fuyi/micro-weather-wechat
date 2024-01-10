@@ -797,8 +797,7 @@ Page({
       this.fetchDayByDayWeather(params)
       wx.hideLoading()
       this.setData({
-        current_city: this.data.merged_cities[0],
-        date_time_struct: util.deconstructionTime(new Date())
+        date_time_struct: util.deconstructionTime(new Date()),
       })
       // this.selectComponent('#swiper').init(0);
       // this.setData({
@@ -806,6 +805,7 @@ Page({
       // })
       console.log('Init completed.')
     }).catch(err => {
+      console.log(err)
       wx.showToast({
         title: '初始化数据失败',
         icon: 'error'
