@@ -1,6 +1,7 @@
 {
   "usingComponents": {
     "weather-real-time": "../../components/weather/real-time/real-time",
-    "weather-hour-forecast": "../../components/weather/hour-forecast/hour-forecast"
+    "weather-hour-forecast": "../../components/weather/hour-forecast/hour-forecast",
+        "weather-day-forecast": "../../components/weather/day-forecast/day-forecast"
   }
 }

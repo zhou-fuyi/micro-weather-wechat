@@ -1,2 +1,22 @@
-<!--components/weather/day-forecast/day-forecast.wxml-->
-<text>components/weather/day-forecast/day-forecast.wxml</text>
+<!-- components/weather/day-forecast/day-forecast.wxml -->
+<view class="day_forecast">
+    <view class="title">
+        <text>未来预报（7d）</text>
+    </view>
+    <view wx:for="{{dayByDay}}" wx:key="fxDate" class="option">
+        <text>{{item.day_of_week}}</text>
+        <view class="day">
+            <text>白天</text>
+            <text class="{{ 'qi-' + item.iconDay}}"></text>
+            <text>{{item.textDay}}</text>
+        </view>
+        <view class="night">
+            <text>晚间</text>
+            <text class="{{ 'qi-' + item.iconNight}}"></text>
+            <text>{{item.textNight}}</text>
+        </view>
+        <view class="last">
+            <text>{{item.tempMax}}° / {{item.tempMin}}°</text>
+        </view>
+    </view>
+</view>

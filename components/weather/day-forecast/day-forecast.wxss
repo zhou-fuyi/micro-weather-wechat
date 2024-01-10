@@ -1,1 +1,38 @@
 /* components/weather/day-forecast/day-forecast.wxss */
+
+.day_forecast {
+  display: flex;
+  flex-direction: column;
+  margin-top: 36rpx;
+}
+
+.day_forecast .title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 35rpx;
+  font-family: "monospace";
+  color: rgb(72, 72, 72);
+}
+
+.day_forecast .option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10rpx 30rpx;
+  height: 70rpx;
+  border-bottom: rgb(219, 219, 219) solid 1rpx;
+}
+
+.day_forecast .option view {
+  display: flex;
+  align-items: baseline;
+}
+
+.day_forecast .option .last {
+  font-size: 30rpx;
+}
+
+.day_forecast .day text, .day_forecast .night text {
+  margin-left: 9rpx;
+}
