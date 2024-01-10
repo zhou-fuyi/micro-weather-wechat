@@ -4,6 +4,7 @@ import { request } from './request/index';
 
 App({
   onLaunch() {
+    // debugger
     this.checkSession().then((res) => {
       this.globalData.hasLogged = true
     }).catch((err) => {
@@ -18,10 +19,29 @@ App({
           resolve(res)
           console.log(res)
         }).catch((err) => {
+          debugger
           reject(err)
         })
       } else {
-        resolve(res)
+        // debugger
+        this.wechatOauthCheck().then((res) => {
+          resolve(res)
+          console.log(res)
+        }).catch((err) => {
+          debugger
+          // Token过期, 重新登录
+          if(err.data.code === 401){
+            this.wechatOauth().then((_res) => {
+              resolve(_res)
+              console.log(_res)
+            }).catch((_err) => {
+              debugger
+              reject(_err)
+            })
+          }else{
+            reject(err)
+          }
+        })
         console.log('check session successful.')
       }
     })
@@ -48,6 +68,21 @@ App({
             })
           })
         }
+      })
+    })
+  },
+  wechatOauthCheck() {
+    return new Promise((resolve, reject) => {
+      // 发送 res.code 到后台换取 openId, sessionKey, unionId
+      request({
+        url: APP_CONFIG.apis.oauth.check
+      }).then((res) => {
+        resolve(res)
+      }).catch((err) => {
+        reject(err)
+        wx.showToast({
+          title: '令牌国企，将自动重新登陆.'
+        })
       })
     })
   },

@@ -1,0 +1,121 @@
+/* components/weather/real-time.wxss */
+.real_time {
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  height: 20%;
+  box-sizing: border-box;
+  margin: 0 auto;
+  background-color: rgb(29, 34, 40, .9);
+  color: white;
+  justify-content: space-between;
+  padding: 30rpx 40rpx;
+  border-radius: .5em;
+}
+
+.real_time text {
+  font-size: 35rpx;
+}
+
+.real_time ._top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.real_time ._top .left {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.real_time ._top .left view {
+  display: flex;
+  align-items: center;
+}
+
+
+.left text{
+  margin-right: 20rpx;
+}
+
+.left .plus {
+  font-size: 45rpx;
+}
+
+.right, .right > view{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.right > text{
+  margin-right: 20rpx;
+}
+
+.right .time{
+  color: rgb(153, 157, 166);
+  font-size: 31rpx;
+}
+
+.real_time ._bottom {
+  display: flex;
+  align-items: center;
+}
+
+._bottom .other view {
+  margin-right: 21rpx;
+}
+
+._bottom .other {
+  display: flex;
+  align-items: center;
+  height: 96%;
+}
+
+._bottom .other .unit {
+  align-self: start;
+}
+
+.real_time ._bottom .other .middle {
+  height: 86%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.real_time ._bottom .aqi {
+  display: flex;
+  align-items: center;
+  border: rgb(155, 169, 123) solid 1rpx;
+  color: rgb(155, 169, 123);
+  padding: 0 7rpx;
+  margin: 0;
+  border-radius: 9%;
+}
+
+._bottom .middle .aqi text {
+  font-size: 30rpx;
+}
+
+.real_time ._bottom .other .wind {
+  height: 86%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+._bottom .temperature{
+  margin-right: 8rpx;
+}
+
+.temperature text{
+  font-size: 110rpx;
+  font-weight: bolder;
+}
+
+.unit text{
+  font-weight: bolder;
+  display: flex;
+  margin-top: 16rpx;
+}

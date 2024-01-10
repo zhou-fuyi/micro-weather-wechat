@@ -3,6 +3,7 @@ export const APP_CONFIG = {
   apis: {
     oauth: {
       we_chat: 'oauth/we_chat',
+      check: 'oauth/check'
     },
     admin_division: {
       spatial_lookup: 'admin_divisions/spatial/lookup',

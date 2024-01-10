@@ -78,10 +78,32 @@ const getAqiColor = aqi => {
   return color
 }
 
+// 箭头函数的this始终指向函数定义时的this
+/**
+ * 获取当前定位
+ * @returns 
+ */
+const location = ({type, altitude, isHighAccuracy} = {type:'gcj02', altitude:false, isHighAccuracy:true}) => {
+  return new Promise((resolve, reject) => {
+    wx.getLocation({
+      type,
+      altitude,
+      isHighAccuracy,
+      success: (res) => {
+        resolve(res)
+      },
+      fail: (err) => {
+        reject(err)
+      }
+    })
+  })
+}
+
 module.exports = {
   formatTime,
   px2rpx,
   deconstructionTime,
   dayOfTheWeek,
-  getAqiColor
+  getAqiColor,
+  location
 }

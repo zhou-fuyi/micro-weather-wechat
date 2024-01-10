@@ -10,6 +10,8 @@ import * as echarts from '../../components/ec-canvas/echarts';
 const util = require('../../utils/util.js')
 // 引入SDK核心类
 var QQMapWX = require('../../libs/qqmap-wx-jssdk/qqmap-wx-jssdk');
+
+const app = getApp();
 var qqmapsdk;
 let _charts = [];
 
@@ -123,6 +125,9 @@ Page({
     admin_division: {},
     located_admin_division: {},
     city_list: [],
+    followed_cities: [],
+    interested_cities: [],
+    merged_cities: [],
     weather_real_time: {},
     air_real_time: {},
     hour_by_hour: [],
@@ -285,37 +290,43 @@ Page({
   fetchRealTimeWeather(options) {
     const {
       longitude,
-      latitude
+      latitude,
+      index
     } = options
     let _location = '' + longitude + ',' + latitude;
+    let merged_cities = this.data.merged_cities;
     request({
       url: APP_CONFIG.apis.weather.real_time + _location,
     }).then((res) => {
       const {
         updateTime
-      } = res.data
+      } = res.data;
+      merged_cities[index].weather_real_time = {
+        ...res.data,
+        updateTime: util.formatTime(new Date(updateTime)),
+        ...util.deconstructionTime(updateTime)
+      }
       this.setData({
-        weather_real_time: {
-          ...res.data,
-          updateTime: util.formatTime(new Date(updateTime)),
-          ...util.deconstructionTime(updateTime)
-        }
+        merged_cities
       })
     })
     request({
       url: APP_CONFIG.apis.air.real_time + _location,
     }).then((res) => {
+      merged_cities[index].air_real_time = res.data;
       this.setData({
-        air_real_time: res.data
+        merged_cities
       })
     })
   },
   fetchHourByHourWeather(options) {
     const {
       longitude,
-      latitude
+      latitude,
+      index
     } = options
     let _location = '' + longitude + ',' + latitude;
+    let merged_cities = this.data.merged_cities;
     request({
       url: APP_CONFIG.apis.weather.hour_by_hour + _location,
     }).then((res) => {
@@ -335,38 +346,76 @@ Page({
         }
       })
 
-      this.data.city_list.forEach((city, index, object) => {
-        if (city.divisionId === this.data.admin_division.id) {
-          setOption(_charts[index].chart, {
-            x_arr,
-            pop_arr,
-            temp_arr
-          })
-          return
-        }
+      merged_cities[index].hour_by_hour = {
+        x_arr,
+        temp_arr,
+        pop_arr
+      }
+      this.setData({
+        merged_cities
       })
     })
   },
   fetchDayByDayWeather(options) {
     const {
       longitude,
-      latitude
+      latitude,
+      index
     } = options
     let _location = '' + longitude + ',' + latitude;
+    let merged_cities = this.data.merged_cities;
     request({
       url: APP_CONFIG.apis.weather.day_by_day + _location,
     }).then((res) => {
+      merged_cities[index].day_by_day = {
+        ...res.data.map(item => {
+          if (new Date().getDate() === new Date(item.fxDate).getDate()) {
+            item.day_of_week = '今天'
+          } else {
+            item.day_of_week = util.dayOfTheWeek(item.fxDate)
+          }
+          return item
+        })
+      }
       this.setData({
-        day_by_day: {
-          ...res.data.map(item => {
-            if (new Date().getDate() === new Date(item.fxDate).getDate()) {
-              item.day_of_week = '今天'
-            } else {
-              item.day_of_week = util.dayOfTheWeek(item.fxDate)
-            }
-            return item
+        merged_cities
+      })
+    })
+  },
+  /**
+   * 获取关注城市数据，并将结果放入 followed_cities 
+   * @param {*} options 参数对象，目前仅对cached进行解析处理，意味是否通过缓存获取数据
+   * @returns 
+   */
+  fetchFollowedCities(options) {
+    return new Promise((resolve, reject) => {
+      const {
+        cached
+      } = options;
+      if (cached) {
+        const cached_followed_cities = wx.getStorageSync(APP_CONFIG.constants.followed_cities);
+        if (cached_followed_cities.length > 0) {
+          this.setData({
+            followed_cities: cached_followed_cities
           })
+          resolve(cached_followed_cities)
         }
+        console.log('无法从缓存中获取 followed_cities')
+      }
+      request({
+        url: APP_CONFIG.apis.follow_city.list_by_subject_id
+      }).then((res) => {
+        const followed_cities = res.data.map(item => ({
+          city: item,
+          followed: true
+        }))
+        this.setData({
+          followed_cities
+        })
+        wx.setStorageSync(APP_CONFIG.constants.followed_cities, followed_cities)
+        resolve(followed_cities)
+      }).catch((err) => {
+        reject(err)
       })
     })
   },
@@ -679,20 +728,95 @@ Page({
       imageUrl: ''
     }
   },
-  onLoad() {
-    this.followCitiesRefreshEvenHandler({
-      reflush: true,
-      init_charts: true
+  /**
+   * 1、初始化地图
+   * 2、初始化布局参数
+   * 3、获取定位数据
+   * 4、根据定位数据获取当前所在区域
+   * 5、获取关注城市数据（关注城市followed_cities与临时点击新增城市interested_cities分开存储）
+   * ，最终由两者合成城市列表（city_list） 其中，关注城市由服务接口提供，可使用缓存
+   * ，但需要保持与远端的数据同步
+   * 6、获取当前城市的天气数据（实时、24小时、7天）
+   */
+  init() {
+    this.watch(this.mergeCities)
+    // this.mergedCitiesWatch(this.correctSwiperShow)
+    wx.showLoading({
+      title: '数据加载中...',
+      mask: true
     })
-    this.getMapLocation();
-    this.setData({
-      date_time_struct: util.deconstructionTime(new Date()),
-      city_list: wx.getStorageSync(APP_CONFIG.constants.followed_cities)
+    util.location().then((res) => {
+      const {
+        latitude,
+        longitude
+      } = res;
+      this.setData({
+        location: {
+          latitude,
+          longitude
+        },
+        location_coordinates: [longitude, latitude]
+      })
+      return request({
+        url: APP_CONFIG.apis.admin_division.spatial_lookup,
+        data: {
+          location: 'POINT(' + longitude + ' ' + latitude + ')',
+          spatialCapable: true
+        }
+      })
+    }).then((_res) => {
+      this.setData({
+        located: true,
+        location_city: {
+          ..._res.data[0],
+          centerPoint: {
+            coordinates: this.data.location_coordinates,
+            type: 'Point'
+          }
+        },
+        interested_cities: _res.data.map(item => ({
+          ...item,
+          centerPoint: {
+            coordinates: this.data.location_coordinates,
+            type: 'Point'
+          },
+          followed: false
+        }))
+      })
+    }).then(() => {
+      return this.fetchFollowedCities({
+        cached: false
+      })
+    }).then(() => {
+      const params = {
+        ...this.data.location,
+        index: 0
+      }
+      this.fetchRealTimeWeather(params)
+      this.fetchHourByHourWeather(params)
+      this.fetchDayByDayWeather(params)
+      wx.hideLoading()
+      this.setData({
+        current_city: this.data.merged_cities[0],
+        date_time_struct: util.deconstructionTime(new Date())
+      })
+      // this.selectComponent('#swiper').init(0);
+      // this.setData({
+      //   duration: '250'
+      // })
+      console.log('Init completed.')
+    }).catch(err => {
+      wx.showToast({
+        title: '初始化数据失败',
+        icon: 'error'
+      })
     })
+
     // 实例化API核心类
     qqmapsdk = new QQMapWX({
       key: this.data.key
     });
+    this.mapCtx = wx.createMapContext('qq_map_wx', this);
     wx.getSystemInfo({
       complete: (res) => {
         this.setData({
@@ -706,25 +830,85 @@ Page({
         })
       },
     })
-    this.followCitiesRefreshEvenHandler({
-      reflush: true,
-      init_charts: true
+  },
+  /**
+   * 用于合并interested_cities与followed_cities，合并为merged_cities，作为最终的城市列表数据
+   * @param {*} params 
+   */
+  mergeCities: function (params) {
+    let {
+      interested_cities,
+      followed_cities
+    } = this.data
+    if (interested_cities.length > 0) {
+      followed_cities.forEach((item) => {
+        for (let index = interested_cities.length - 1; index >= 0; index--) {
+          if (item.city.divisionCode === interested_cities[index].code) {
+            interested_cities.splice(index, 1)
+            break
+          }
+        }
+      })
+    }
+    const merged_cities = [...interested_cities, ...followed_cities]
+    this.setData({
+      merged_cities
     })
+    return merged_cities;
+  },
+  /**
+   * 数据监听器，对interested_cities与followed_cities进行监听，用于实时合并数据
+   * @param {*} callback 回调函数，在监听对象发生变化时调用
+   */
+  watch: function (callback) {
+    var _data = this.data;
+
+    Object.defineProperty(_data, "followed_cities", {
+      enumerable: true,
+      configurable: true,
+      set: function (value) {
+        this._followed_cities = value;
+        callback(value);
+      },
+      get: function () {
+        if (this._followed_cities) {
+          return this._followed_cities
+        } else {
+          return []
+        }
+      }
+    });
+
+    Object.defineProperty(_data, "interested_cities", {
+      enumerable: true,
+      configurable: true,
+      set: function (value) {
+        this._interested_cities = value;
+        callback(value);
+      },
+      get: function () {
+        if (this._interested_cities) {
+          return this._interested_cities
+        } else {
+          return []
+        }
+      }
+    });
+  },
+  onLoad() {
+    // debugger
+    if (app.globalData.hasLogged) {
+      this.init()
+    } else {
+      app.watch((params) => {
+        this.init()
+      })
+    }
   },
   /**
    * 生命周期函数--监听页面初次渲染完成
    */
-  onReady: function () {
-    this.followCitiesRefreshEvenHandler({
-      reflush: true,
-      init_charts: true
-    })
-    this.mapCtx = wx.createMapContext('qq_map_wx', this);
-    wx.showShareMenu({
-      withShareTicket: true,
-      menus: ['shareAppMessage', 'shareTimeline']
-    })
-  },
+  onReady: function () {},
   /**
    * 生命周期函数--监听页面显示
    */

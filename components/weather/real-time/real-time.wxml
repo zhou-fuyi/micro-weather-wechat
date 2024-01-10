@@ -1,0 +1,40 @@
+<!-- components/weather/real-time.wxml -->
+<view class="real_time">
+    <view class="_top">
+        <view class="left">
+            <view catchtap="chooseCity">
+                <text class="iconfont icon-wei- plus"></text>
+            </view>
+            <text>{{admin_division.divisionName}}</text>
+            <view style="{{followed ? 'color: red' : ''}}" catchtap="onFollowCity" data-division-id="{{admin_division.divisionId}}" data-division-code="{{admin_division.divisionCode}}" data-division-name="{{admin_division.divisionName}}">
+                <text class="iconfont icon-31guanzhu1 attention"></text>
+            </view>
+        </view>
+        <view class="right">
+            <!-- 注： text 会将换行也作为内容进行计算 -->
+            <text class="time">{{weatherRealTime.hour < 10 ? '0' + weatherRealTime.hour : weatherRealTime.hour}}:{{weatherRealTime.minute < 10 ? '0' + weatherRealTime.minute: weatherRealTime.minute}} 更新</text>
+            <view id="icon-rotate-container" catchtap="onWeatherFlush">
+                <text class="iconfont icon-shuaxin1"></text>
+            </view>
+        </view>
+    </view>
+    <view class="_bottom">
+        <view class="temperature">
+            <text id="temperature">{{weatherRealTime.temp}}</text>
+        </view>
+        <view class="other">
+            <view class="unit">
+                <text class="iconfont icon-morenyuanquan"></text>
+            </view>
+            <view class="middle">
+                <text>{{weatherRealTime.text}}</text>
+                <view class="aqi">
+                    <text>AQI {{airRealTime.category}}</text>
+                </view>
+            </view>
+            <view class="wind">
+                <text>{{weatherRealTime.windDir}}{{weatherRealTime.windScale}}级</text>
+            </view>
+        </view>
+    </view>
+</view>

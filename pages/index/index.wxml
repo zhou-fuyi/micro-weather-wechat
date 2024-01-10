@@ -28,21 +28,22 @@
   <movable-area class="moveable-area" style="height:{{windowHeight * 2}}px">
     <movable-view class="moveable-view" direction="{{movable_view_direction}}" inertia="false" damping="70" out-of-bounds="true" y="{{y}}" style="width:{{screenWidth}}rpx;height:{{windowHeight}}px" bindtouchstart="slidingStart" bindtouchend="slidingEnd">
       <swiper class="swiper-container" indicator-dots="{{true}}" current="{{swiper_index}}" duration="500" bindchange="swiperChangeHandler">
-        <block wx:for="{{city_list}}" wx:key="index">
-          <swiper-item item-id="{{item.divisionId}}">
-            <view class="bo-top-container">
+        <block wx:for="{{merged_cities}}" wx:key="index">
+          <swiper-item item-id="{{item.city.divisionId}}">
+            <weather-real-time admin_division="{{item.city}}" followed="{{item.followed}}" weather-real-time="{{item.weather_real_time}}" air-real-time="{{item.air_real_time}}"></weather-real-time>
+            <!-- <view class="bo-top-container">
               <view class="_top">
                 <view class="left">
                   <view catchtap="chooseCity">
                     <text class="iconfont icon-wei- plus"></text>
                   </view>
-                  <text>{{item.divisionName}}</text>
-                  <view style="{{item.followed ? 'color: red' : ''}}" catchtap="onFollowCity" data-division-id="{{item.divisionId}}" data-division-code="{{item.divisionCode}}" data-division-name="{{item.divisionName}}">
+                  <text>{{item.city.divisionName}}</text>
+                  <view style="{{itemcity..followed ? 'color: red' : ''}}" catchtap="onFollowCity" data-division-id="{{item.city.divisionId}}" data-division-code="{{item.city.divisionCode}}" data-division-name="{{item.city.divisionName}}">
                     <text class="iconfont icon-31guanzhu1 attention"></text>
                   </view>
                 </view>
                 <view class="right">
-                  <text class="time">{{weather_real_time.hour < 10 ? '0' + weather_real_time.hour : weather_real_time.hour}}:{{weather_real_time.minute < 10 ? '0' + weather_real_time.minute: weather_real_time.minute}} 更新</text>
+                  <text class="time">{{item.weather_real_time.hour < 10 ? '0' + item.weather_real_time.hour : item.weather_real_time.hour}}:{{item.weather_real_time.minute < 10 ? '0' + item.weather_real_time.minute: item.weather_real_time.minute}} 更新</text>
                       <view id="icon-rotate-container" catchtap="onWeatherflush">
                         <text class="iconfont icon-shuaxin1"></text>
                       </view>
@@ -50,24 +51,24 @@
               </view>
               <view class="_bottom">
                 <view class="temperature">
-                  <text id="temperature">{{weather_real_time.temp}}</text>
+                  <text id="temperature">{{item.weather_real_time.temp}}</text>
                 </view>
                 <view class="other">
                   <view class="unit">
                     <text class="iconfont icon-morenyuanquan"></text>
                   </view>
                   <view class="middle">
-                    <text>{{weather_real_time.text}}</text>
+                    <text>{{item.weather_real_time.text}}</text>
                     <view class="aqi">
-                      <text>AQI {{air_real_time.category}}</text>
+                      <text>AQI {{item.air_real_time.category}}</text>
                     </view>
                   </view>
                   <view class="wind">
-                    <text>{{weather_real_time.windDir}}{{weather_real_time.windScale}}级</text>
+                    <text>{{item.weather_real_time.windDir}}{{item.weather_real_time.windScale}}级</text>
                   </view>
                 </view>
               </view>
-            </view>
+            </view> -->
             <scroll-view scroll-y="{{scroll_view_disabled}}" enhanced="true" style="height:{{0.77 * windowHeight}}px" bindscroll="scroll" binddragend="dragEndHandler" bindscrolltoupper="scrollToUpperHandler" bindscrolltolower="scrollToLowerHandler">
               <view class="bo-other-container" style="height:{{windowHeight}}px">
                 <view class="description">
