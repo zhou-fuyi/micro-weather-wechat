@@ -6,7 +6,7 @@ import {
 import {
   request
 } from '../../request/index';
-import * as echarts from '../../components/ec-canvas/echarts';
+// import * as echarts from '../../components/ec-canvas/echarts';
 const util = require('../../utils/util.js')
 // 引入SDK核心类
 var QQMapWX = require('../../libs/qqmap-wx-jssdk/qqmap-wx-jssdk');
@@ -286,99 +286,132 @@ Page({
       }
     })
   },
-  // 获取实时天气与空气质量
+  // 获取实时天气
   fetchRealTimeWeather(options) {
-    const {
-      longitude,
-      latitude,
-      index
-    } = options
-    let _location = '' + longitude + ',' + latitude;
-    let merged_cities = this.data.merged_cities;
-    request({
-      url: APP_CONFIG.apis.weather.real_time + _location,
-    }).then((res) => {
+    return new Promise((resolve, reject) => {
       const {
-        updateTime
-      } = res.data;
-      merged_cities[index].weather_real_time = {
-        ...res.data,
-        updateTime: util.formatTime(new Date(updateTime)),
-        ...util.deconstructionTime(updateTime)
-      }
-      this.setData({
-        merged_cities
+        longitude,
+        latitude,
+        index
+      } = options
+      let _location = '' + longitude + ',' + latitude;
+      let merged_cities = this.data.merged_cities
+      request({
+        url: APP_CONFIG.apis.weather.real_time + _location,
+      }).then((res) => {
+        const {
+          updateTime
+        } = res.data
+        merged_cities[index].weather_real_time = {
+          ...res.data,
+          updateTime: util.formatTime(new Date(updateTime)),
+          ...util.deconstructionTime(updateTime)
+        }
+        this.setData({
+          merged_cities
+        })
+        resolve(merged_cities)
+      }).catch((err) => {
+        reject(err)
       })
     })
-    request({
-      url: APP_CONFIG.apis.air.real_time + _location,
-    }).then((res) => {
-      merged_cities[index].air_real_time = res.data;
-      this.setData({
-        merged_cities
+  },
+  /**
+   * 获取实时空气质量
+   * @param {*} options 
+   * @returns 
+   */
+  fetchRealTimeaAir(options) {
+    return new Promise((resolve, reject) => {
+      const {
+        longitude,
+        latitude,
+        index
+      } = options
+      let _location = '' + longitude + ',' + latitude;
+      let merged_cities = this.data.merged_cities
+      request({
+        url: APP_CONFIG.apis.air.real_time + _location,
+      }).then((res) => {
+        merged_cities[index].air_real_time = res.data
+        this.setData({
+          merged_cities
+        })
+        resolve(merged_cities)
+      }).catch((err) => {
+        reject(err)
       })
     })
   },
   fetchHourByHourWeather(options) {
-    const {
-      longitude,
-      latitude,
-      index
-    } = options
-    let _location = '' + longitude + ',' + latitude;
-    let merged_cities = this.data.merged_cities;
-    request({
-      url: APP_CONFIG.apis.weather.hour_by_hour + _location,
-    }).then((res) => {
-      this.setData({
-        hour_by_hour: {
-          ...res.data
+    return new Promise((resolve, reject) => {
+      const {
+        longitude,
+        latitude,
+        index
+      } = options
+      let _location = '' + longitude + ',' + latitude;
+      let merged_cities = this.data.merged_cities
+      request({
+        url: APP_CONFIG.apis.weather.hour_by_hour + _location,
+      }).then((res) => {
+        this.setData({
+          hour_by_hour: {
+            ...res.data
+          }
+        })
+        const x_arr = res.data.map(item => new Date(item.fxTime).getHours())
+        const temp_arr = res.data.map(item => parseInt(item.temp))
+        const pop_arr = res.data.map(item => {
+          const pop = item.pop;
+          if (pop) {
+            return parseInt(item.pop);
+          } else {
+            return 0;
+          }
+        })
+        merged_cities[index].hour_by_hour = {
+          x_arr,
+          temp_arr,
+          pop_arr
         }
-      })
-      const x_arr = res.data.map(item => new Date(item.fxTime).getHours())
-      const temp_arr = res.data.map(item => parseInt(item.temp))
-      const pop_arr = res.data.map(item => {
-        const pop = item.pop;
-        if (pop) {
-          return parseInt(item.pop);
-        } else {
-          return 0;
-        }
-      })
-
-      merged_cities[index].hour_by_hour = {
-        x_arr,
-        temp_arr,
-        pop_arr
-      }
-      this.setData({
-        merged_cities
+        this.setData({
+          merged_cities
+        })
+        resolve(merged_cities)
+      }).catch((err) => {
+        reject(err)
       })
     })
   },
   fetchDayByDayWeather(options) {
-    const {
-      longitude,
-      latitude,
-      index
-    } = options
-    let _location = '' + longitude + ',' + latitude;
-    let merged_cities = this.data.merged_cities;
-    request({
-      url: APP_CONFIG.apis.weather.day_by_day + _location,
-    }).then((res) => {
-      merged_cities[index].day_by_day = {
-        ...res.data.map(item => {
-          if (new Date().getDate() === new Date(item.fxDate).getDate()) {
-            item.day_of_week = '今天'
-          } else {
-            item.day_of_week = util.dayOfTheWeek(item.fxDate)
-          }
-          return item
+    return new Promise((resolve, reject) => {
+      const {
+        longitude,
+        latitude,
+        index
+      } = options
+      let _location = '' + longitude + ',' + latitude;
+      let merged_cities = this.data.merged_cities
+      request({
+        url: APP_CONFIG.apis.weather.day_by_day + _location,
+      }).then((res) => {
+        merged_cities[index].day_by_day = {
+          ...res.data.map(item => {
+            if (new Date().getDate() === new Date(item.fxDate).getDate()) {
+              item.day_of_week = '今天'
+            } else {
+              item.day_of_week = util.dayOfTheWeek(item.fxDate)
+            }
+            return item
+          })
+        }
+        this.setData({
+          merged_cities
         })
-      }
-      this.setData({
-        merged_cities
+        resolve(merged_cities)
+      }).catch((err) => {
+        reject(err)
       })
     })
   },
@@ -788,21 +821,24 @@ Page({
         cached: false
       })
     }).then(() => {
-      const params = {
-        ...this.data.location,
-        index: 0
-      }
-      this.fetchRealTimeWeather(params)
-      this.fetchHourByHourWeather(params)
-      this.fetchDayByDayWeather(params)
-      wx.hideLoading()
-      this.setData({
-        date_time_struct: util.deconstructionTime(new Date()),
+      return new Promise((resolve, reject) => {
+        const params = { ...this.data.location, index: 0 }
+        this.fetchRealTimeWeather(params).then(() => {
+          return this.fetchRealTimeaAir(params)
+        }).then(() => {
+          return this.fetchHourByHourWeather(params)
+        }).then(() => {
+          return this.fetchDayByDayWeather(params)
+        }).then((res) => {
+          resolve(res)
+        }).catch((err) => {
+          reject(err)
+        })      
       })
-      // this.selectComponent('#swiper').init(0);
-      // this.setData({
-      //   duration: '250'
-      // })
+    }).then((res) => {
+      console.log(res)
+      console.log('Init completed.')
+      wx.hideLoading()
       console.log('Init completed.')
     }).catch(err => {
       console.log(err)
@@ -810,6 +846,9 @@ Page({
         title: '初始化数据失败',
         icon: 'error'
       })
+    })
+    this.setData({
+      date_time_struct: util.deconstructionTime(new Date()),
     })
 
     // 实例化API核心类

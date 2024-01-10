@@ -1,6 +1,6 @@
 {
   "usingComponents": {
-    "ec-canvas": "../../components/ec-canvas/ec-canvas",
-    "weather-real-time": "../../components/weather/real-time/real-time"
+    "weather-real-time": "../../components/weather/real-time/real-time",
+    "weather-hour-forecast": "../../components/weather/hour-forecast/hour-forecast"
   }
 }

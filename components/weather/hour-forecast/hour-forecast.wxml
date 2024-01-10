@@ -1,2 +1,4 @@
-<!--components/hour-forecast/hour-forecast.wxml-->
-<text>components/hour-forecast/hour-forecast.wxml</text>
+<!-- components/weather/hour-forecast/hour-forecast.wxml -->
+<view class="ec_container">
+    <ec-canvas id="{{admin_division.divisionId}}" canvas-id="{{admin_division.divisionId}}" ec="{{ec}}"></ec-canvas>
+</view>

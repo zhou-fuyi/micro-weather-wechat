@@ -1,1 +1,12 @@
-/* components/hour-forecast/hour-forecast.wxss */
+/* components/weather/hour-forecast/hour-forecast.wxss */
+.ec_container {
+  width: 100%;
+  height: 100%;
+}
+
+ec-canvas {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  top: 20rpx;
+}

@@ -101,7 +101,7 @@ page {
 }
 
 /* 浮动面板 */
-
+/* 
 .bo-top-container {
   display: flex;
   flex-direction: column;
@@ -223,7 +223,7 @@ page {
   font-weight: bolder;
   display: flex;
   margin-top: 16rpx;
-}
+} */
 
 /* other start */
 
