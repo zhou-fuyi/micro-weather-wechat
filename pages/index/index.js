@@ -63,20 +63,20 @@ Page({
         console.log(res)
         const current_node = this.data.merged_cities[this.data.current_index]
         const bounds = `${res.southwest.latitude},${res.southwest.longitude};${res.northeast.latitude},${res.northeast.longitude}`
-      const wind = `${current_node.weather_real_time.windDir}${current_node.weather_real_time.windScale}级`
-      const center = `${res.latitude},${res.longitude}`
-      const aqi = current_node.air.category.length <= 2 ? current_node.air.category : current_node.air.category.substr(0, 2)
+        const wind = `${current_node.weather_real_time.windDir}${current_node.weather_real_time.windScale}级`
+        const center = `${res.latitude},${res.longitude}`
+        const aqi = current_node.air.category.length <= 2 ? current_node.air.category : current_node.air.category.substr(0, 2)
         request({
           url: APP_CONFIG.apis.poster.weather,
           data: {
             bounds,
-          location: this.data.current_city.name,
-          temperature: current_node.weather.temp,
-          text: current_node.weather.text,
-          wind,
-          aqi,
-          aqiColor: util.getAqiColor(current_node.air.category),
-          center
+            location: this.data.current_city.name,
+            temperature: current_node.weather.temp,
+            text: current_node.weather.text,
+            wind,
+            aqi,
+            aqiColor: util.getAqiColor(current_node.air.category),
+            center
           },
           method: 'POST'
         }).then(res => {
@@ -292,17 +292,20 @@ Page({
         latitude,
         longitude
       } = res;
-      return request({
+      request({
         url: APP_CONFIG.apis.admin_division.spatial_lookup,
         data: {
           location: 'POINT(' + longitude + ' ' + latitude + ')',
           spatialCapable: true
         }
-      })
-    }).then((_res) => {
-      this.switchCity({
-        admin_division: _res.data[0],
-        switch_to_top: true
+      }).then((res) => {
+        let admin_division = res.data[0]
+        admin_division.centerPoint.coordinates[0] = longitude
+        admin_division.centerPoint.coordinates[1] = latitude
+        this.switchCity({
+          admin_division,
+          switch_to_top: true
+        })
       })
     }).catch((err) => {
       this.switchCity({
@@ -325,7 +328,7 @@ Page({
         }).then(res => {
           const merged_cities = this.data.merged_cities;
           merged_cities.forEach((item) => {
-            if(item.city.id === res.data.id){
+            if (item.city.id === res.data.id) {
               item.city = res.data
             }
           })
@@ -401,7 +404,10 @@ Page({
     } = options.admin_division.centerPoint;
     let _index = options.index;
     if (options.switch_to_top) {
-      const { interested_cities, merged_cities } = this.data
+      const {
+        interested_cities,
+        merged_cities
+      } = this.data
       let followed = false;
       merged_cities.forEach(item => {
         if (item.city.id === options.admin_division.id) {
@@ -427,6 +433,7 @@ Page({
         longitude: coordinates[0],
         latitude: coordinates[1]
       },
+      scale: MAP_CONFIG.scale,
       current_city: options.district,
       date_time_struct: util.deconstructionTime(new Date())
     })
@@ -455,8 +462,10 @@ Page({
           interested_cities.splice(index, 1)
         }
       }
-      if(interested_cities.length === 0){
-        interested_cities.push({city: this.data.location_city})
+      if (interested_cities.length === 0) {
+        interested_cities.push({
+          city: this.data.location_city
+        })
       }
     }
     if (reflush) {
@@ -469,7 +478,10 @@ Page({
         this.setData({
           followed_cities
         })
-        const params = { ...this.data.location, index: this.data.swiper_index }
+        const params = {
+          ...this.data.location,
+          index: this.data.swiper_index
+        }
         this.fetchRealTimeWeather(params)
         this.fetchRealTimeaAir(params)
         this.fetchHourByHourWeather(params)
@@ -603,7 +615,11 @@ Page({
         date_time_struct: util.deconstructionTime(new Date())
       })
       const coordinates = this.data.merged_cities[0].city.centerPoint.coordinates
-      const params = { longitude: coordinates[0], latitude: coordinates[1], index: 0 }
+      const params = {
+        longitude: coordinates[0],
+        latitude: coordinates[1],
+        index: 0
+      }
       this.fetchRealTimeWeather(params)
       this.fetchRealTimeaAir(params)
       this.fetchHourByHourWeather(params)
