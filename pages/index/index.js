@@ -6,225 +6,28 @@ import {
 import {
   request
 } from '../../request/index';
-// import * as echarts from '../../components/ec-canvas/echarts';
 const util = require('../../utils/util.js')
 // 引入SDK核心类
 var QQMapWX = require('../../libs/qqmap-wx-jssdk/qqmap-wx-jssdk');
 
 const app = getApp();
 var qqmapsdk;
-let _charts = [];
-
-function setOption(chart, args) {
-  const {
-    x_arr,
-    pop_arr,
-    temp_arr
-  } = args
-  const option = {
-    title: {
-      text: '逐小时天气预报（24h）',
-      left: 'center',
-      top: 'top',
-      textStyle: {
-        fontWeight: "lighter",
-        color: 'rgba(72, 72, 72, 1)',
-        fontStyle: "normal",
-        fontFamily: "monospace",
-        textShadowColor: "transparent"
-      }
-    },
-    legend: {
-      data: ['温度', '降水概率'],
-      top: '12%'
-    },
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: {
-        type: 'cross'
-      }
-    },
-    xAxis: {
-      type: 'category',
-      name: '\n\n时刻',
-      nameLocation: 'end',
-      nameGap: 7,
-      nameTextStyle: {
-        padding: [200, 0, 0, 0]
-      },
-      axisTick: {
-        alignWithLabel: true
-      },
-      data: x_arr
-    },
-    yAxis: [{
-        type: 'value',
-        name: '降水概率',
-        position: 'right',
-        min: 0,
-        max: 100,
-        axisLabel: {
-          formatter: '{value} %'
-        }
-      },
-      {
-        type: 'value',
-        name: '温度',
-        position: 'left',
-        axisLabel: {
-          formatter: '{value} °C'
-        }
-      }
-    ],
-    series: [{
-        name: '降水概率',
-        type: 'bar',
-        yAxisIndex: 0,
-        data: pop_arr,
-        smooth: true
-      },
-      {
-        name: '温度',
-        type: 'line',
-        data: temp_arr,
-        yAxisIndex: 1,
-        smooth: true
-      }
-    ],
-    grid: {
-      top: '30%',
-      bottom: '13%',
-      left: '13%',
-      right: '13%'
-    }
-  }
-  chart.setOption(option)
-}
-
-function initChart(canvas, width, height, dpr) {
-  const _chart = echarts.init(canvas, null, {
-    width: width,
-    height: height,
-    devicePixelRatio: dpr // 像素
-  });
-  canvas.setChart(_chart);
-  setOption(_chart, {})
-
-  _charts.push({
-    canvas_id: parseInt(canvas.canvasId),
-    chart: _chart
-  })
-  return _chart
-}
 
 Page({
   data: {
     ...MAP_CONFIG,
-    map_context: null,
     located: false,
     admin_division: {},
-    located_admin_division: {},
-    city_list: [],
+    current_city: {},
+    location_city: {},
     followed_cities: [],
     interested_cities: [],
     merged_cities: [],
-    weather_real_time: {},
-    air_real_time: {},
-    hour_by_hour: [],
-    day_by_day: [],
     date_time_struct: {},
-    ec: {
-      onInit: initChart
-      // 将 lazyLoad 设为 true 后，需要手动初始化图表
-      // lazyLoad: true
-    },
     movable_view_direction: 'vertical',
     scroll_view_disabled: false,
     scroll_view_sliding: false,
     swiper_index: 0
-  },
-  //获得地图
-  getMapLocation(e) {
-    wx.getLocation({
-      type: 'gcj02', //wgs84 返回 gps 坐标，gcj02 返回可用于 wx.openLocation 的坐标
-      isHighAccuracy: true,
-      // 箭头函数的this始终指向函数定义时的this
-      success: (res) => {
-        console.log(res)
-        const {
-          latitude,
-          longitude
-        } = res;
-        request({
-          url: APP_CONFIG.apis.admin_division.spatial_lookup,
-          data: {
-            location: 'POINT(' + longitude + ' ' + latitude + ')',
-            spatialCapable: true
-          }
-        }).then((res) => {
-          let city_list = this.data.city_list;
-          let followed = false;
-          if (city_list.length > 0) {
-            const first_city = res.data[0];
-            city_list.forEach((city, index, object) => {
-              if (city.divisionId === first_city.id) {
-                followed = city.followed
-                object.splice(index, 1)
-              }
-            })
-            city_list.unshift({
-              followed,
-              divisionId: first_city.id,
-              divisionName: first_city.name,
-              divisionCode: first_city.code
-            })
-          } else {
-            city_list = [{
-              followed,
-              divisionId: res.data[0].id,
-              divisionName: res.data[0].name,
-              divisionCode: res.data[0].code
-            }]
-          }
-          this.setData({
-            admin_division: {
-              ...res.data[0],
-              followed
-            },
-            located_admin_division: {
-              ...res.data[0]
-            },
-            city_list,
-            swiper_index: 0
-          })
-          this.fetchHourByHourWeather({
-            longitude,
-            latitude
-          })
-        })
-        this.setData({
-          location: {
-            latitude,
-            longitude
-          }
-        });
-        this.fetchRealTimeWeather({
-          longitude,
-          latitude
-        })
-
-        this.fetchDayByDayWeather({
-          longitude,
-          latitude
-        })
-      },
-      fail: (err) => {
-        console.log(err)
-        this.setData({
-          ...this.data.location
-        })
-      }
-    })
   },
   // 点击地图事件
   onTapMap(event) {
@@ -239,16 +42,20 @@ Page({
         spatialCapable: true
       }
     }).then(res => {
-      this.acceptDataForSwitchCity({
-        data: {
-          ...res.data[0],
-          switch_to_top: true
-        }
+      this.switchCity({
+        admin_division: {
+          ...res.data[0]
+        },
+        switch_to_top: true
       })
     })
 
     console.log(`经度：${longitude}，维度：${latitude}`)
   },
+  /**
+   * 分享图片
+   * @param {*} event 
+   */
   onWeatherShare(event) {
     console.log(event)
     this.mapCtx.getRegion({
@@ -288,31 +95,26 @@ Page({
   },
   // 获取实时天气
   fetchRealTimeWeather(options) {
-    return new Promise((resolve, reject) => {
+    const {
+      longitude,
+      latitude,
+      index
+    } = options
+    let _location = '' + longitude + ',' + latitude;
+    let merged_cities = this.data.merged_cities
+    request({
+      url: APP_CONFIG.apis.weather.real_time + _location,
+    }).then((res) => {
       const {
-        longitude,
-        latitude,
-        index
-      } = options
-      let _location = '' + longitude + ',' + latitude;
-      let merged_cities = this.data.merged_cities
-      request({
-        url: APP_CONFIG.apis.weather.real_time + _location,
-      }).then((res) => {
-        const {
-          updateTime
-        } = res.data
-        merged_cities[index].weather_real_time = {
-          ...res.data,
-          updateTime: util.formatTime(new Date(updateTime)),
-          ...util.deconstructionTime(updateTime)
-        }
-        this.setData({
-          merged_cities
-        })
-        resolve(merged_cities)
-      }).catch((err) => {
-        reject(err)
+        updateTime
+      } = res.data
+      merged_cities[index].weather_real_time = {
+        ...res.data,
+        updateTime: util.formatTime(new Date(updateTime)),
+        ...util.deconstructionTime(updateTime)
+      }
+      this.setData({
+        merged_cities
       })
     })
   },
@@ -322,96 +124,81 @@ Page({
    * @returns 
    */
   fetchRealTimeaAir(options) {
-    return new Promise((resolve, reject) => {
-      const {
-        longitude,
-        latitude,
-        index
-      } = options
-      let _location = '' + longitude + ',' + latitude;
-      let merged_cities = this.data.merged_cities
-      request({
-        url: APP_CONFIG.apis.air.real_time + _location,
-      }).then((res) => {
-        merged_cities[index].air_real_time = res.data
-        this.setData({
-          merged_cities
-        })
-        resolve(merged_cities)
-      }).catch((err) => {
-        reject(err)
+    const {
+      longitude,
+      latitude,
+      index
+    } = options
+    let _location = '' + longitude + ',' + latitude;
+    let merged_cities = this.data.merged_cities
+    request({
+      url: APP_CONFIG.apis.air.real_time + _location,
+    }).then((res) => {
+      merged_cities[index].air_real_time = res.data
+      this.setData({
+        merged_cities
       })
     })
   },
   fetchHourByHourWeather(options) {
-    return new Promise((resolve, reject) => {
-      const {
-        longitude,
-        latitude,
-        index
-      } = options
-      let _location = '' + longitude + ',' + latitude;
-      let merged_cities = this.data.merged_cities
-      request({
-        url: APP_CONFIG.apis.weather.hour_by_hour + _location,
-      }).then((res) => {
-        this.setData({
-          hour_by_hour: {
-            ...res.data
-          }
-        })
-        const x_arr = res.data.map(item => new Date(item.fxTime).getHours())
-        const temp_arr = res.data.map(item => parseInt(item.temp))
-        const pop_arr = res.data.map(item => {
-          const pop = item.pop;
-          if (pop) {
-            return parseInt(item.pop);
-          } else {
-            return 0;
-          }
-        })
-        merged_cities[index].hour_by_hour = {
-          x_arr,
-          temp_arr,
-          pop_arr
+    const {
+      longitude,
+      latitude,
+      index
+    } = options
+    let _location = '' + longitude + ',' + latitude;
+    let merged_cities = this.data.merged_cities
+    request({
+      url: APP_CONFIG.apis.weather.hour_by_hour + _location,
+    }).then((res) => {
+      this.setData({
+        hour_by_hour: {
+          ...res.data
         }
-        this.setData({
-          merged_cities
-        })
-        resolve(merged_cities)
-      }).catch((err) => {
-        reject(err)
+      })
+      const x_arr = res.data.map(item => new Date(item.fxTime).getHours())
+      const temp_arr = res.data.map(item => parseInt(item.temp))
+      const pop_arr = res.data.map(item => {
+        const pop = item.pop;
+        if (pop) {
+          return parseInt(item.pop);
+        } else {
+          return 0;
+        }
+      })
+      merged_cities[index].hour_by_hour = {
+        x_arr,
+        temp_arr,
+        pop_arr
+      }
+      this.setData({
+        merged_cities
       })
     })
   },
   fetchDayByDayWeather(options) {
-    return new Promise((resolve, reject) => {
-      const {
-        longitude,
-        latitude,
-        index
-      } = options
-      let _location = '' + longitude + ',' + latitude;
-      let merged_cities = this.data.merged_cities
-      request({
-        url: APP_CONFIG.apis.weather.day_by_day + _location,
-      }).then((res) => {
-        merged_cities[index].day_by_day = {
-          ...res.data.map(item => {
-            if (new Date().getDate() === new Date(item.fxDate).getDate()) {
-              item.day_of_week = '今天'
-            } else {
-              item.day_of_week = util.dayOfTheWeek(item.fxDate)
-            }
-            return item
-          })
-        }
-        this.setData({
-          merged_cities
+    const {
+      longitude,
+      latitude,
+      index
+    } = options
+    let _location = '' + longitude + ',' + latitude;
+    let merged_cities = this.data.merged_cities
+    request({
+      url: APP_CONFIG.apis.weather.day_by_day + _location,
+    }).then((res) => {
+      merged_cities[index].day_by_day = {
+        ...res.data.map(item => {
+          if (new Date().getDate() === new Date(item.fxDate).getDate()) {
+            item.day_of_week = '今天'
+          } else {
+            item.day_of_week = util.dayOfTheWeek(item.fxDate)
+          }
+          return item
         })
-        resolve(merged_cities)
-      }).catch((err) => {
-        reject(err)
+      }
+      this.setData({
+        merged_cities
       })
     })
   },
@@ -425,31 +212,35 @@ Page({
       const {
         cached
       } = options;
+      let completed = false;
       if (cached) {
         const cached_followed_cities = wx.getStorageSync(APP_CONFIG.constants.followed_cities);
         if (cached_followed_cities.length > 0) {
           this.setData({
             followed_cities: cached_followed_cities
           })
+          completed = true;
           resolve(cached_followed_cities)
+        } else {
+          completed = false;
+          console.log('无法从缓存中获取 followed_cities')
         }
-        console.log('无法从缓存中获取 followed_cities')
       }
-      request({
-        url: APP_CONFIG.apis.follow_city.list_by_subject_id
-      }).then((res) => {
-        const followed_cities = res.data.map(item => ({
-          city: item,
-          followed: true
-        }))
-        this.setData({
-          followed_cities
+      if (!completed) {
+        request({
+          url: APP_CONFIG.apis.follow_city.list_by_subject_id
+        }).then((res) => {
+          const followed_cities = util.mapFollowcities(res.data)
+          // 因 merge cities 可能会删除 followed_cities中数据，所以刷新缓存动作需要放置在setData前
+          wx.setStorageSync(APP_CONFIG.constants.followed_cities, followed_cities)
+          this.setData({
+            followed_cities
+          })
+          resolve(followed_cities)
+        }).catch((err) => {
+          reject(err)
         })
-        wx.setStorageSync(APP_CONFIG.constants.followed_cities, followed_cities)
-        resolve(followed_cities)
-      }).catch((err) => {
-        reject(err)
-      })
+      }
     })
   },
   slidingStart(e) {
@@ -488,33 +279,55 @@ Page({
       })
     }
   },
-  locationTap(e) {
-    this.getMapLocation();
+  onLocation(e) {
+    util.location().then((res) => {
+      const {
+        latitude,
+        longitude
+      } = res;
+      return request({
+        url: APP_CONFIG.apis.admin_division.spatial_lookup,
+        data: {
+          location: 'POINT(' + longitude + ' ' + latitude + ')',
+          spatialCapable: true
+        }
+      })
+    }).then((_res) => {
+      this.switchCity({
+        admin_division: _res.data[0],
+        switch_to_top: true
+      })
+    }).catch((err) => {
+      this.switchCity({
+        admin_division: this.data.location_city,
+        switch_to_top: true
+      })
+    })
     this.setData({
       located: true
     })
   },
   swiperChangeHandler(event) {
     if (event.detail.source === 'touch') {
-      const id = parseInt(event.detail.currentItemId);
-      request({
-        url: APP_CONFIG.apis.admin_division.query_by_id + id,
-      }).then(res => {
-
-        let followed = false;
-        this.data.city_list.forEach(city => {
-          if (city.divisionId === id) {
-            followed = city.followed
-          }
+      const index = event.detail.current
+      if (!this.data.merged_cities[index].city.centerPoint) {
+        const id = parseInt(event.detail.currentItemId);
+        request({
+          url: APP_CONFIG.apis.admin_division.query_by_id + id,
+        }).then(res => {
+          this.switchCity({
+            admin_division: {
+              ...res.data
+            },
+            index
+          })
         })
-        this.acceptDataForSwitchCity({
-          data: {
-            ...res.data,
-            followed,
-            swiper_index: event.detail.current
-          }
+      } else {
+        this.switchCity({
+          admin_division: this.data.merged_cities[index].city,
+          index
         })
-      })
+      }
     }
   },
   // 监听视野变化
@@ -539,165 +352,138 @@ Page({
 
     }
   },
-  onFollowCity(event) {
-    request({
-      url: APP_CONFIG.apis.follow_city.follow,
-      data: {
-        ...event.currentTarget.dataset,
-        state: 'Focus'
-      },
-      method: 'POST'
-    }).then(res => {
-      let city_list = this.data.city_list;
-      city_list.forEach((city, index, object) => {
-        if (city.divisionId === res.data.divisionId) {
-          object.splice(index, 1)
-        }
+  onFollow(event) {
+    const temp_city = this.data.merged_cities.filter(item => event.detail.divisionId === item.city.id)[0]
+    if (temp_city && !temp_city.followed) {
+      request({
+        url: APP_CONFIG.apis.follow_city.follow,
+        data: {
+          ...event.detail,
+          state: 'Focus'
+        },
+        method: 'POST'
+      }).then(res => {
+        const interested_cities = this.data.interested_cities
+        interested_cities.forEach(item => {
+          if (event.detail.divisionId === item.city.id) {
+            item.followed = true;
+          }
+        })
+        this.setData({
+          interested_cities
+        })
       })
-      city_list.unshift({
-        ...res.data,
-        followed: true
-      })
-
-      this.setData({
-        city_list,
-        admin_division: {
-          ...this.data.admin_division,
-          followed: true
-        }
-      })
-    })
+    } else {
+      console.log('follow completed.')
+    }
   },
   // 切换城市
-  acceptDataForSwitchCity(options) {
-    console.log('accept data for switch city.')
-    console.log(options)
+  switchCity(options) {
     const {
       coordinates
-    } = options.data.centerPoint;
-    const city_list = this.data.city_list
-    // 将切换的城市置顶
-    if (options.data.switch_to_top) {
-      city_list.forEach((city, index, object) => {
-        if (city.divisionId === options.data.id) {
+    } = options.admin_division.centerPoint;
+    let _index = options.index;
+    if (options.switch_to_top) {
+      const { interested_cities, merged_cities } = this.data
+      let followed = false;
+      merged_cities.forEach(item => {
+        if (item.city.id === options.admin_division.id) {
+          followed = item.followed
+        }
+      })
+      interested_cities.forEach((item, index, object) => {
+        if (item.city.id === options.admin_division.id) {
           object.splice(index, 1)
         }
       })
-      city_list.unshift({
-        followed: options.data.followed,
-        divisionId: options.data.id,
-        divisionName: options.data.name,
-        divisionCode: options.data.code
+      interested_cities.unshift({
+        city: options.admin_division,
+        followed
+      })
+      _index = 0
+      this.setData({
+        interested_cities
       })
     }
     this.setData({
-      admin_division: {
-        ...options.data
-      },
       location: {
         longitude: coordinates[0],
         latitude: coordinates[1]
       },
-      city_list,
+      current_city: options.district,
       date_time_struct: util.deconstructionTime(new Date())
     })
-    this.fetchRealTimeWeather({
+    const params = {
       longitude: coordinates[0],
-      latitude: coordinates[1]
-    })
-    this.fetchHourByHourWeather({
-      longitude: coordinates[0],
-      latitude: coordinates[1]
-    })
-    this.fetchDayByDayWeather({
-      longitude: coordinates[0],
-      latitude: coordinates[1]
-    })
+      latitude: coordinates[1],
+      index: _index
+    }
+    this.fetchRealTimeWeather(params)
+    this.fetchHourByHourWeather(params)
+    this.fetchDayByDayWeather(params)
     // 必须先完成跳转页面数据设定动作，最后进行跳转索引设置，避免swiper前后来回跳转导致未能达到正确的页面跳转效果问题
     this.setData({
-      swiper_index: options.data.swiper_index,
+      swiper_index: _index,
     })
   },
   followCitiesRefreshEvenHandler(options) {
     const {
       reflush
     } = options;
+    if (options.un_follow_id) {
+      const interested_cities = this.data.interested_cities
+      for (let index = interested_cities.length - 1; index >= 0; index--) {
+        if (interested_cities[index].city.id === options.un_follow_id) {
+          interested_cities.splice(index, 1)
+        }
+      }
+      if(interested_cities.length === 0){
+        interested_cities.push({city: this.data.location_city})
+      }
+    }
     if (reflush) {
       request({
         url: APP_CONFIG.apis.follow_city.list_by_subject_id
       }).then(res => {
-        const followed_cities = res.data;
-        let admin_division = this.data.admin_division
-        let city_list = Object.values(this.data.city_list).filter(city => (!city.followed))
-        admin_division.followed = false;
-        if (followed_cities.length > 0) {
-          admin_division = {
-            id: followed_cities[0].divisionId,
-            code: followed_cities[0].divisionId,
-            name: followed_cities[0].divisionName,
-            followed: true
-          }
-          followed_cities.forEach(city => {
-            city_list.forEach((inner_city, index, object) => {
-              if (city.divisionId === inner_city.divisionId) {
-                object.splice(index, 1)
-              }
-            })
-          })
-
-        }
-        if (city_list.length === 0 && followed_cities.length === 0 && Object.keys(this.data.located_admin_division).length > 0) {
-          city_list.push({
-            divisionId: this.data.located_admin_division.id,
-            divisionName: this.data.located_admin_division.name,
-            divisionCode: this.data.located_admin_division.code,
-            followed: false
-          })
-          admin_division = {
-            ...this.data.located_admin_division,
-            followed: admin_division.followed
-          }
-        }
-        const cities = [...city_list, ...followed_cities.map(city => ({
-          ...city,
-          followed: true
-        }))]
+        const followed_cities = util.mapFollowcities(res.data)
+        // 因 merge cities 可能会删除 followed_cities中数据，所以刷新缓存动作需要放置在setData前
+        wx.setStorageSync(APP_CONFIG.constants.followed_cities, followed_cities)
         this.setData({
-          city_list: cities
+          followed_cities
         })
-        request({
-          url: APP_CONFIG.apis.admin_division.query_by_id + admin_division.id,
-        }).then(res => {
-          this.setData({
-            admin_division: {
-              ...res.data,
-              followed: admin_division.followed
-            },
-          })
-        })
+        const params = { ...this.data.location, index: this.data.swiper_index }
+        this.fetchRealTimeWeather(params)
+        this.fetchRealTimeaAir(params)
+        this.fetchHourByHourWeather(params)
+        this.fetchDayByDayWeather(params)
       })
     }
   },
   // 页面跳转，城市选择, 消息通道绑定
-  chooseCity(e) {
+  onChoose(e) {
     console.log(e)
     console.log('页面跳转 --> city')
     wx.navigateTo({
       url: '../city/city',
       events: {
-        acceptSwithCityData: this.acceptDataForSwitchCity,
+        acceptSwithCityData: this.switchCity,
         refreshEvent: this.followCitiesRefreshEvenHandler,
       }
     })
   },
   // 刷新天气数据（根据当前地图中心点）
-  onWeatherflush(event) {
+  onFlush(event) {
     this.setData({
       date_time_struct: util.deconstructionTime(new Date())
     })
-    this.fetchRealTimeWeather(this.data.location)
-    this.fetchHourByHourWeather(this.data.location)
-    this.fetchDayByDayWeather(this.data.location)
+    const params = {
+      ...this.data.location,
+      index: this.data.swiper_index
+    }
+    this.fetchRealTimeWeather(params)
+    this.fetchRealTimeaAir(params)
+    this.fetchHourByHourWeather(params)
+    this.fetchDayByDayWeather(params)
     this.animate('#icon-rotate-container', [{
         rotate: 0
       },
@@ -767,7 +553,7 @@ Page({
    * 3、获取定位数据
    * 4、根据定位数据获取当前所在区域
    * 5、获取关注城市数据（关注城市followed_cities与临时点击新增城市interested_cities分开存储）
-   * ，最终由两者合成城市列表（city_list） 其中，关注城市由服务接口提供，可使用缓存
+   * ，最终由两者合成城市列表（merged_cities） 其中，关注城市由服务接口提供，可使用缓存
    * ，但需要保持与远端的数据同步
    * 6、获取当前城市的天气数据（实时、24小时、7天）
    */
@@ -800,13 +586,7 @@ Page({
     }).then((_res) => {
       this.setData({
         located: true,
-        location_city: {
-          ..._res.data[0],
-          centerPoint: {
-            coordinates: this.data.location_coordinates,
-            type: 'Point'
-          }
-        },
+        location_city: _res.data[0],
         interested_cities: _res.data.map(item => ({
           ...item,
           centerPoint: {
@@ -821,24 +601,20 @@ Page({
         cached: false
       })
     }).then(() => {
-      return new Promise((resolve, reject) => {
-        const params = { ...this.data.location, index: 0 }
-        this.fetchRealTimeWeather(params).then(() => {
-          return this.fetchRealTimeaAir(params)
-        }).then(() => {
-          return this.fetchHourByHourWeather(params)
-        }).then(() => {
-          return this.fetchDayByDayWeather(params)
-        }).then((res) => {
-          resolve(res)
-        }).catch((err) => {
-          reject(err)
-        })      
-      })
-    }).then((res) => {
-      console.log(res)
-      console.log('Init completed.')
       wx.hideLoading()
+      this.setData({
+        current_city: this.data.merged_cities[0].city,
+        date_time_struct: util.deconstructionTime(new Date())
+      })
+      const params = {
+        ...this.data.location,
+        index: 0
+      }
+      this.fetchRealTimeWeather(params)
+      this.fetchRealTimeaAir(params)
+      this.fetchHourByHourWeather(params)
+      this.fetchDayByDayWeather(params)
+
       console.log('Init completed.')
     }).catch(err => {
       console.log(err)
@@ -846,9 +622,6 @@ Page({
         title: '初始化数据失败',
         icon: 'error'
       })
-    })
-    this.setData({
-      date_time_struct: util.deconstructionTime(new Date()),
     })
 
     // 实例化API核心类
@@ -880,14 +653,15 @@ Page({
       followed_cities
     } = this.data
     if (interested_cities.length > 0) {
-      followed_cities.forEach((item) => {
+      for (let out_index = followed_cities.length - 1; out_index >= 0; out_index--) {
         for (let index = interested_cities.length - 1; index >= 0; index--) {
-          if (item.city.divisionCode === interested_cities[index].code) {
-            interested_cities.splice(index, 1)
+          if (followed_cities[out_index].city.code === interested_cities[index].code) {
+            interested_cities[index] = followed_cities[out_index]
+            followed_cities.splice(out_index, 1)
             break
           }
         }
-      })
+      }
     }
     const merged_cities = [...interested_cities, ...followed_cities]
     this.setData({

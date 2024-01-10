@@ -33,6 +33,9 @@ Component({
    * 组件的方法列表
    */
   methods: {
+    onChooseCity(event) {
+      this.triggerEvent('choose', event)
+    },
     /**
      * 新增当前城市为关注城市
      * @param {*} event 

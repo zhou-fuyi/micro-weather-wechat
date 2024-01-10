@@ -2,11 +2,11 @@
 <view class="real_time">
     <view class="_top">
         <view class="left">
-            <view catchtap="chooseCity">
+            <view catchtap="onChooseCity">
                 <text class="iconfont icon-wei- plus"></text>
             </view>
-            <text>{{admin_division.divisionName}}</text>
-            <view style="{{followed ? 'color: red' : ''}}" catchtap="onFollowCity" data-division-id="{{admin_division.divisionId}}" data-division-code="{{admin_division.divisionCode}}" data-division-name="{{admin_division.divisionName}}">
+            <text>{{admin_division.name}}</text>
+            <view style="{{followed ? 'color: red' : ''}}" catchtap="onFollowCity" data-division-id="{{admin_division.id}}" data-division-code="{{admin_division.code}}" data-division-name="{{admin_division.name}}">
                 <text class="iconfont icon-31guanzhu1 attention"></text>
             </view>
         </view>

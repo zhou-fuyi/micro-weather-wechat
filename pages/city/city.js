@@ -66,11 +66,6 @@ Page({
       method: 'POST'
     }).then((res) => {
       this.clearInput()
-      // this.setData({
-      //   follow_cities: [...this.data.follow_cities, ...[res.data]],
-      //   search_cities: [],
-      //   city_panel_showed: true
-      // })
       // 通知地图页面进行刷新
       const eventChannel = this.getOpenerEventChannel()
       eventChannel.emit('refreshEvent', {
@@ -90,14 +85,11 @@ Page({
     }).then(res => {
       const eventChannel = this.getOpenerEventChannel()
       eventChannel.emit('acceptSwithCityData', {
-        data: {
-          ...res.data,
-          ...{
-            followed: true,
-            switch_to_top: true,
-            swiper_index: 0
-          }
-        }
+        admin_division: {
+          ...res.data
+        },
+        switch_to_top: true,
+        index: 0
       })
       wx.navigateBack({
         delta: 1
@@ -106,9 +98,7 @@ Page({
   },
   unFollow(event) {
     console.log(event)
-    const {
-      id
-    } = event.currentTarget.dataset;
+    const { id, divisionId } = event.currentTarget.dataset;
     request({
       url: APP_CONFIG.apis.follow_city.un_follow + id,
       method: "DELETE"
@@ -123,9 +113,7 @@ Page({
         follow_cities
       })
       const eventChannel = this.getOpenerEventChannel()
-      eventChannel.emit('refreshEvent', {
-        reflush: true
-      })
+      eventChannel.emit('refreshEvent', { reflush: true, un_follow_id: divisionId })
     })
   },
   slidingStart(e) {

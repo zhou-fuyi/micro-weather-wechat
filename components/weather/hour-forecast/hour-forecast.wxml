@@ -1,4 +1,4 @@
 <!-- components/weather/hour-forecast/hour-forecast.wxml -->
 <view class="ec_container">
-    <ec-canvas id="{{admin_division.divisionId}}" canvas-id="{{admin_division.divisionId}}" ec="{{ec}}"></ec-canvas>
+    <ec-canvas id="{{admin_division.id}}" canvas-id="{{admin_division.id}}" ec="{{ec}}"></ec-canvas>
 </view>

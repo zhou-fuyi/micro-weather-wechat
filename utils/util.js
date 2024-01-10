@@ -83,7 +83,15 @@ const getAqiColor = aqi => {
  * 获取当前定位
  * @returns 
  */
-const location = ({type, altitude, isHighAccuracy} = {type:'gcj02', altitude:false, isHighAccuracy:true}) => {
+const location = ({
+  type,
+  altitude,
+  isHighAccuracy
+} = {
+  type: 'gcj02',
+  altitude: false,
+  isHighAccuracy: true
+}) => {
   return new Promise((resolve, reject) => {
     wx.getLocation({
       type,
@@ -99,11 +107,23 @@ const location = ({type, altitude, isHighAccuracy} = {type:'gcj02', altitude:fal
   })
 }
 
+const mapFollowcities = (followCities) => {
+  return followCities.map(item => ({
+    city: {
+      id: item.divisionId,
+      name: item.divisionName,
+      code: item.divisionCode
+    },
+    followed: true
+  }))
+}
+
 module.exports = {
   formatTime,
   px2rpx,
   deconstructionTime,
   dayOfTheWeek,
   getAqiColor,
-  location
+  location,
+  mapFollowcities
 }

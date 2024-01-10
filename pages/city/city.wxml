@@ -14,7 +14,7 @@
                     <view>{{item.divisionCode}}</view>
                     <!-- <view>{{item.grade}}</view> -->
                 </view>
-                <view class="del-btn-container" catchtap="unFollow" data-id="{{item.id}}">
+                <view class="del-btn-container" catchtap="unFollow" data-id="{{item.id}}"  data-division-id="{{item.divisionId}}">
                     <button type="warn" class="del-btn" style="width: {{delBtnWidth}}rpx">删除</button>
                 </view>
             </movable-view>
