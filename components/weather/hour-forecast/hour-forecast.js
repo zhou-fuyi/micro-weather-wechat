@@ -1,5 +1,5 @@
 // components/weather/hour-forecast/hour-forecast.js
-import * as echarts from '../../ec-canvas/ec-canvas';
+import * as echarts from '../../ec-canvas/echarts';
 let _charts = [];
 
 function initChart(canvas, width, height, dpr) {
