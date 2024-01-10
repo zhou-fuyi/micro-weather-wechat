@@ -129,9 +129,9 @@ Component({
   },
 
   observers: {
-    hourByHour: function (_hourByHour) {
-      if (_hourByHour) {
-        setOption(_charts[this.data.index].chart, _hourByHour)
+    'index, hourByHour': function (index, _hourByHour) {
+      if (_hourByHour && _charts.length > 0) {
+        setOption(_charts[index].chart, _hourByHour)
       }
     }
   },

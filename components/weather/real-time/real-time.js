@@ -49,6 +49,17 @@ Component({
      */
     onWeatherFlush(event){
       this.triggerEvent('flush', {})
+      this.animate('#icon-rotate-container', [
+        { rotate: 0 },
+        { rotate: 90 },
+        { rotate: 180 },
+        { rotate: 270 },
+        { rotate: 360 },
+      ], 1000, function () {
+        this.clearAnimation('#icon-rotate-container', { rotate: true }, function () {
+          // console.log("清除了#icon-rotate-container上的otate属性")
+        })
+      }.bind(this))
     }
   }
 })

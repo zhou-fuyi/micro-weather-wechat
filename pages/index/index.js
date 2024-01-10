@@ -61,20 +61,22 @@ Page({
     this.mapCtx.getRegion({
       success: res => {
         console.log(res)
+        const current_node = this.data.merged_cities[this.data.current_index]
         const bounds = `${res.southwest.latitude},${res.southwest.longitude};${res.northeast.latitude},${res.northeast.longitude}`
-        const wind = `${this.data.weather_real_time.windDir}${this.data.weather_real_time.windScale}级`
-        const center = `${this.data.location.latitude},${this.data.location.longitude}`
+      const wind = `${current_node.weather_real_time.windDir}${current_node.weather_real_time.windScale}级`
+      const center = `${res.latitude},${res.longitude}`
+      const aqi = current_node.air.category.length <= 2 ? current_node.air.category : current_node.air.category.substr(0, 2)
         request({
           url: APP_CONFIG.apis.poster.weather,
           data: {
             bounds,
-            location: this.data.admin_division.name,
-            temperature: this.data.weather_real_time.temp,
-            text: this.data.weather_real_time.text,
-            wind,
-            aqi: this.data.air_real_time.category,
-            aqiColor: util.getAqiColor(this.data.air_real_time.category),
-            center
+          location: this.data.current_city.name,
+          temperature: current_node.weather.temp,
+          text: current_node.weather.text,
+          wind,
+          aqi,
+          aqiColor: util.getAqiColor(current_node.air.category),
+          center
           },
           method: 'POST'
         }).then(res => {
@@ -82,6 +84,11 @@ Page({
           wx.previewImage({
             current: res.data,
             urls: [res.data]
+          })
+        }).catch((err) => {
+          wx.showToast({
+            title: '图片获取失败',
+            icon: 'error'
           })
         })
       },
@@ -310,11 +317,21 @@ Page({
   swiperChangeHandler(event) {
     if (event.detail.source === 'touch') {
       const index = event.detail.current
-      if (!this.data.merged_cities[index].city.centerPoint) {
+      const _current_city = this.data.merged_cities[index]
+      if (!_current_city.city.centerPoint) {
         const id = parseInt(event.detail.currentItemId);
         request({
           url: APP_CONFIG.apis.admin_division.query_by_id + id,
         }).then(res => {
+          const merged_cities = this.data.merged_cities;
+          merged_cities.forEach((item) => {
+            if(item.city.id === res.data.id){
+              item.city = res.data
+            }
+          })
+          this.setData({
+            merged_cities
+          })
           this.switchCity({
             admin_division: {
               ...res.data
@@ -324,7 +341,7 @@ Page({
         })
       } else {
         this.switchCity({
-          admin_division: this.data.merged_cities[index].city,
+          admin_division: _current_city.city,
           index
         })
       }
@@ -419,6 +436,7 @@ Page({
       index: _index
     }
     this.fetchRealTimeWeather(params)
+    this.fetchRealTimeaAir(params)
     this.fetchHourByHourWeather(params)
     this.fetchDayByDayWeather(params)
     // 必须先完成跳转页面数据设定动作，最后进行跳转索引设置，避免swiper前后来回跳转导致未能达到正确的页面跳转效果问题
@@ -484,28 +502,6 @@ Page({
     this.fetchRealTimeaAir(params)
     this.fetchHourByHourWeather(params)
     this.fetchDayByDayWeather(params)
-    this.animate('#icon-rotate-container', [{
-        rotate: 0
-      },
-      {
-        rotate: 90
-      },
-      {
-        rotate: 180
-      },
-      {
-        rotate: 270
-      },
-      {
-        rotate: 360
-      },
-    ], 1000, function () {
-      this.clearAnimation('#icon-rotate-container', {
-        rotate: true
-      }, function () {
-        console.log("清除了#icon-rotate-container上的otate属性")
-      })
-    }.bind(this))
   },
   dragEndHandler(event) {
     console.log(event)
@@ -561,7 +557,7 @@ Page({
     this.watch(this.mergeCities)
     // this.mergedCitiesWatch(this.correctSwiperShow)
     wx.showLoading({
-      title: '数据加载中...',
+      title: 'Loading...',
       mask: true
     })
     util.location().then((res) => {
@@ -606,10 +602,8 @@ Page({
         current_city: this.data.merged_cities[0].city,
         date_time_struct: util.deconstructionTime(new Date())
       })
-      const params = {
-        ...this.data.location,
-        index: 0
-      }
+      const coordinates = this.data.merged_cities[0].city.centerPoint.coordinates
+      const params = { longitude: coordinates[0], latitude: coordinates[1], index: 0 }
       this.fetchRealTimeWeather(params)
       this.fetchRealTimeaAir(params)
       this.fetchHourByHourWeather(params)
@@ -656,7 +650,13 @@ Page({
       for (let out_index = followed_cities.length - 1; out_index >= 0; out_index--) {
         for (let index = interested_cities.length - 1; index >= 0; index--) {
           if (followed_cities[out_index].city.code === interested_cities[index].code) {
-            interested_cities[index] = followed_cities[out_index]
+            interested_cities[index] = {
+              ...followed_cities[out_index],
+              city: {
+                ...interested_cities[index],
+                ...followed_cities[out_index].city
+              }
+            }
             followed_cities.splice(out_index, 1)
             break
           }
@@ -709,7 +709,6 @@ Page({
     });
   },
   onLoad() {
-    // debugger
     if (app.globalData.hasLogged) {
       this.init()
     } else {
