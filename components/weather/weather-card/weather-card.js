@@ -123,15 +123,21 @@ Component({
     onFollow(event) {
       let region = this.data.region
       if (region && !region.followed) {
+        const param = {
+          divisionId: event.detail.id,
+          divisionCode: event.detail.code,
+          divisionName: event.detail.name
+        }
         request({
           url: APP_CONFIG.apis.follow_city.follow,
           data: {
-            ...event.detail,
+            ...param,
             state: 'Focus'
           },
           method: 'POST'
         }).then(res => {
           region.followed = true
+          region.ref_id = res.data.id
           this.setData({
             region
           })
@@ -142,7 +148,24 @@ Component({
           })
         })
       } else {
-        console.log('follow completed.')
+        if(region.ref_id) {
+          request({
+            url: APP_CONFIG.apis.follow_city.un_follow + region.ref_id,
+            method: "DELETE"
+          }).then(res => {
+            region.followed = false
+            this.setData({
+              region
+            })
+          }).catch(err => {
+            wx.showToast({
+              title: '取消关注城市失败',
+              icon: 'error'
+            })
+          })
+        } 
+        
+        console.log('unfollow completed.')
       }
     },
 

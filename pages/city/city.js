@@ -134,7 +134,7 @@ Page({
     })
   },
   slidingEnd(e) {
-    console.log(e)
+    // console.log(e)
     const {
       id
     } = e.currentTarget.dataset

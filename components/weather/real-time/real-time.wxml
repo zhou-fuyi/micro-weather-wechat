@@ -11,7 +11,8 @@
                 catchtap="onFollowCity" 
                 data-id="{{region.id}}" 
                 data-code="{{region.code}}" 
-                data-name="{{region.name}}">
+                data-name="{{region.name}}"
+                data-followed="{{followed}}">
                 <text class="iconfont icon-31guanzhu1 attention"></text>
             </view>
         </view>

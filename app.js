@@ -16,20 +16,20 @@ App({
         console.log('token does not exist.')
         this.wechatOauth().then((res) => {
           resolve(res)
-          console.log(res)
+          // console.log(res)
         }).catch((err) => {
           reject(err)
         })
       } else {
         this.wechatOauthCheck().then((res) => {
           resolve(res)
-          console.log(res)
+          // console.log(res)
         }).catch((err) => {
           // Token过期, 重新登录
           if(err.code === 401){
             this.wechatOauth().then((_res) => {
               resolve(_res)
-              console.log(_res)
+              // console.log(_res)
             }).catch((_err) => {
               reject(_err)
             })

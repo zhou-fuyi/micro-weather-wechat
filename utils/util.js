@@ -112,7 +112,8 @@ const mapFollowcities = (followCities) => {
     id: item.divisionId,
     name: item.divisionName,
     code: item.divisionCode,
-    followed: true
+    followed: true,
+    ref_id: item.id
   }))
 }
 

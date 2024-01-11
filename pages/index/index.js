@@ -239,18 +239,25 @@ Page({
       }
     })
   },
+  /**
+   * 城市关注事件处理, 事件穿透到index页面
+   * @param {*} event 
+   */
   onFollowUpdate(event) {
-    let { id } = event.detail
-    const { merged_cities } = this.data;
-    merged_cities.forEach(item => {
-      if (item.id === id) {
-        item.followed = true;
-        return
-      }
-    })
-    this.setData({
-      merged_cities
-    })
+    // 以下注释仅更改状态，删除时当前卡片保留
+    // let { id, followed } = event.detail
+    // const { merged_cities } = this.data;
+    // merged_cities.forEach(item => {
+    //   if (item.id === id) {
+    //     item.followed = !followed;
+    //     return
+    //   }
+    // })
+    // this.setData({
+    //   merged_cities
+    // })
+    // 以下语句会重新刷新所有关注城市
+    this.followCitiesRefreshEvenHandler({reflush: true})
   },
   swiperChange(event) {
     let current = event.detail.current
@@ -679,9 +686,9 @@ Page({
     }).then(() => {
       return util.getScale(this.mapCtx)
     }).then((res) => {
-      console.log(res)
+      // console.log(res)
     }).catch(err => {
-      console.log(err)
+      // console.log(err)
     })
     
   },
