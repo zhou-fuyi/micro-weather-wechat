@@ -1,7 +1,6 @@
 {
-  "usingComponents": {
-    "weather-real-time": "../../components/weather/real-time/real-time",
-    "weather-hour-forecast": "../../components/weather/hour-forecast/hour-forecast",
-        "weather-day-forecast": "../../components/weather/day-forecast/day-forecast"
-  }
+    "usingComponents": {
+        "weather-card": "../../components/weather/weather-card/weather-card",
+        "vertical-sliding": "../../components/vertical-sliding/vertical-sliding"
+    }
 }

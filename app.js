@@ -4,7 +4,6 @@ import { request } from './request/index';
 
 App({
   onLaunch() {
-    // debugger
     this.checkSession().then((res) => {
       this.globalData.hasLogged = true
     }).catch((err) => {
@@ -19,23 +18,19 @@ App({
           resolve(res)
           console.log(res)
         }).catch((err) => {
-          debugger
           reject(err)
         })
       } else {
-        // debugger
         this.wechatOauthCheck().then((res) => {
           resolve(res)
           console.log(res)
         }).catch((err) => {
-          debugger
           // Token过期, 重新登录
-          if(err.data.code === 401){
+          if(err.code === 401){
             this.wechatOauth().then((_res) => {
               resolve(_res)
               console.log(_res)
             }).catch((_err) => {
-              debugger
               reject(_err)
             })
           }else{

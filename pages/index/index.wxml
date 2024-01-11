@@ -27,34 +27,21 @@
 <view class="bottom-container">
   <movable-area class="moveable-area" style="height:{{windowHeight * 2}}px">
     <movable-view class="moveable-view" direction="{{movable_view_direction}}" inertia="false" damping="70" out-of-bounds="true" y="{{y}}" style="width:{{screenWidth}}rpx;height:{{windowHeight}}px" bindtouchstart="slidingStart" bindtouchend="slidingEnd">
-      <swiper class="swiper-container" indicator-dots="{{true}}" current="{{swiper_index}}" duration="500" bindchange="swiperChangeHandler">
-        <block wx:for="{{merged_cities}}" wx:key="index">
-          <swiper-item item-id="{{item.city.id}}">
-            <weather-real-time bind:choose="onChoose" bind:follow="onFollow" bind:flush="onFlush"  admin_division="{{item.city}}" followed="{{item.followed}}" weather-real-time="{{item.weather_real_time}}" air-real-time="{{item.air_real_time}}" data-index="{{index}}"></weather-real-time>
-            <scroll-view scroll-y="{{scroll_view_disabled}}" enhanced="true" style="height:{{0.77 * windowHeight}}px" bindscroll="scroll" binddragend="dragEndHandler" bindscrolltoupper="scrollToUpperHandler" bindscrolltolower="scrollToLowerHandler">
-              <view class="bo-other-container" style="height:{{windowHeight}}px">
-                <view class="description">
-                  <text>{{ date_time_struct.hour < 17 ? '今天' + item.day_by_day[0].textDay : '今晚' + item.day_by_day[0].textNight }}，温度{{item.day_by_day[0].tempMin}}-{{item.day_by_day[0].tempMax}}度；能见度{{item.day_by_day[0].vis}}公里。明天{{item.day_by_day[1].textDay}}，温度{{item.day_by_day[1].tempMin}}-{{item.day_by_day[1].tempMax}}度；能见度{{item.day_by_day[1].vis}}公里。</text>
-                </view>
-                <view class="line" id="line"></view>
-                <view class="hour_forecast">
-                  <weather-hour-forecast admin_division="{{item.city}}" cities="{{merged_cities}}" hour-by-hour="{{item.hour_by_hour}}" index="{{index}}"></weather-hour-forecast>
-                </view>
-
-                <weather-day-forecast day-by-day="{{item.day_by_day}}"></weather-day-forecast>
-                <view class="footer-container">
-                  <view class="footer">
-                    <view class="footer_links">
-                      <navigator url="javascript:">数据由和风天气提供</navigator>
-                    </view>
-                    <view class="footer_text">Copyright © weather.zhoujian.site 2022-{{date_time_struct.year}}</view>
-                  </view>
-                </view>
-              </view>
-            </scroll-view>
-          </swiper-item>
-        </block>
-      </swiper>
+      <vertical-sliding 
+        id="swiper"
+        generic:item-container="weather-card"
+        window-height="{{windowHeight}}"
+        contents="{{merged_cities}}"
+        current="{{current}}"
+        scroll-view-disabled="{{scroll_view_disabled}}"
+        bind:change="swiperChange"
+        bind:choose="onChoose"
+        bind:scrollslidingstatus="scrollSlidingHandle"
+        bind:follow="onFollowUpdate"
+        bind:fetchairdata="onFetchAirData"
+        bind:fetchweatherData="onFetchWeatherData"
+        style="height: 100%;width: 100%">
+      </vertical-sliding>
     </movable-view>
   </movable-area>
 </view>

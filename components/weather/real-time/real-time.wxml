@@ -5,14 +5,19 @@
             <view catchtap="onChooseCity">
                 <text class="iconfont icon-wei- plus"></text>
             </view>
-            <text>{{admin_division.name}}</text>
-            <view style="{{followed ? 'color: red' : ''}}" catchtap="onFollowCity" data-division-id="{{admin_division.id}}" data-division-code="{{admin_division.code}}" data-division-name="{{admin_division.name}}">
+            <text>{{region.name}}</text>
+            <view 
+                style="{{followed ? 'color: red' : ''}}" 
+                catchtap="onFollowCity" 
+                data-id="{{region.id}}" 
+                data-code="{{region.code}}" 
+                data-name="{{region.name}}">
                 <text class="iconfont icon-31guanzhu1 attention"></text>
             </view>
         </view>
         <view class="right">
             <!-- 注： text 会将换行也作为内容进行计算 -->
-            <text class="time">{{weatherRealTime.hour < 10 ? '0' + weatherRealTime.hour : weatherRealTime.hour}}:{{weatherRealTime.minute < 10 ? '0' + weatherRealTime.minute: weatherRealTime.minute}} 更新</text>
+            <text class="time">{{weather.hour < 10 ? '0' + weather.hour : weather.hour}}:{{weather.minute < 10 ? '0' + weather.minute: weather.minute}} 更新</text>
             <view id="icon-rotate-container" catchtap="onWeatherFlush">
                 <text class="iconfont icon-shuaxin1"></text>
             </view>
@@ -20,20 +25,20 @@
     </view>
     <view class="_bottom">
         <view class="temperature">
-            <text id="temperature">{{weatherRealTime.temp}}</text>
+            <text id="temperature">{{weather.temp}}</text>
         </view>
         <view class="other">
             <view class="unit">
                 <text class="iconfont icon-morenyuanquan"></text>
             </view>
             <view class="middle">
-                <text>{{weatherRealTime.text}}</text>
+                <text>{{weather.text}}</text>
                 <view class="aqi">
-                    <text>AQI {{airRealTime.category}}</text>
+                  <text>AQI {{air.category}}</text>
                 </view>
             </view>
             <view class="wind">
-                <text>{{weatherRealTime.windDir}}{{weatherRealTime.windScale}}级</text>
+                <text>{{weather.windDir}}{{weather.windScale}}级</text>
             </view>
         </view>
     </view>

@@ -1,0 +1,9 @@
+{
+  "component": true,
+  "usingComponents": {
+    "weather-real-time": "../real-time/real-time",
+    "weather-hour-forecast": "../hour-forecast/hour-forecast",
+    "weather-day-forecast": "../day-forecast/day-forecast"
+  },
+  "styleIsolation": "apply-shared"
+}

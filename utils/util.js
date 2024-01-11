@@ -88,10 +88,10 @@ const location = ({
   altitude,
   isHighAccuracy
 } = {
-  type: 'gcj02',
-  altitude: false,
-  isHighAccuracy: true
-}) => {
+    type: 'gcj02',
+    altitude: false,
+    isHighAccuracy: true
+  }) => {
   return new Promise((resolve, reject) => {
     wx.getLocation({
       type,
@@ -109,13 +109,65 @@ const location = ({
 
 const mapFollowcities = (followCities) => {
   return followCities.map(item => ({
-    city: {
-      id: item.divisionId,
-      name: item.divisionName,
-      code: item.divisionCode
-    },
+    id: item.divisionId,
+    name: item.divisionName,
+    code: item.divisionCode,
     followed: true
   }))
+}
+
+/**
+ * 获取当前地图中心的经纬度。返回的是 gcj02 坐标系 Promise
+ * @param {*} mapContext 
+ * @returns 
+ */
+const getCenterLocation = (mapContext) => {
+  return new Promise((resolve, reject) => {
+    mapContext.getCenterLocation({
+      success: res => {
+        resolve(res)
+      },
+      fail: err => {
+        reject(err)
+      }
+    })
+  })
+}
+
+/**
+ * 获取当前地图的视野范围
+ * @param {*} mapContext 
+ * @returns 
+ */
+const getRegion = (mapContext) => {
+  return new Promise((resolve, reject) => {
+    mapContext.getRegion({
+      success: res => {
+        resolve(res)
+      },
+      fail: err => {
+        reject(err)
+      }
+    })
+  })
+}
+
+/**
+ * 获取当前地图的缩放级别
+ * @param {*} mapContext 
+ * @returns 
+ */
+const getScale = (mapContext) => {
+  return new Promise((resolve, reject) => {
+    mapContext.getScale({
+      success: res => {
+        resolve(res)
+      },
+      fail: err => {
+        reject(err)
+      }
+    })
+  })
 }
 
 module.exports = {
@@ -125,5 +177,8 @@ module.exports = {
   dayOfTheWeek,
   getAqiColor,
   location,
-  mapFollowcities
+  mapFollowcities,
+  getScale,
+  getRegion,
+  getCenterLocation
 }

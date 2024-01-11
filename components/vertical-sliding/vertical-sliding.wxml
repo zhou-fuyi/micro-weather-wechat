@@ -1,2 +1,18 @@
 <!--components/vertical-sliding/vertical-sliding.wxml-->
-<text>components/vertical-sliding/vertical-sliding.wxml</text>
+<swiper 
+    class="swiper-container" 
+    indicator-dots="{{true}}" 
+    current="{{swiper_current}}" 
+    duration="{{duration}}" 
+    bind:change="onChange"
+    circular="{{false}}">
+    <block wx:for="{{swiper_list}}" wx:key="id">
+      <swiper-item item-id="{{id}}">
+            <item-container style="height: 100%;width: 100%" 
+                window-height="{{windowHeight}}" 
+                region="{{item}}"
+                scroll-view-disabled="{{scrollViewDisabled}}"
+                bind:scrollslidingstatus="scrollSlidingHandle"></item-container>
+        </swiper-item>
+    </block>
+</swiper>

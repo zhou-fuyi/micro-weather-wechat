@@ -1,0 +1,55 @@
+/* components/weather/weather-card/weather-card.wxss */
+scroll-view {
+  background-color: white;
+}
+
+.bo-other-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  color: black;
+  font-size: 28rpx;
+}
+
+.bo-other-container .description {
+  /* margin-top: 25rpx; */
+  padding: 0 5%;
+  display: flex;
+  align-items: center;
+  height: 110rpx;
+}
+
+.line {
+  width: 100%;
+  height: 2rpx;
+  padding: 0;
+  background: rgb(219, 219, 219);
+}
+
+.hour_forecast {
+  width: 100%;
+  height: 33%;
+  margin: 20rpx auto 0;
+}
+
+.footer-container {
+  margin-top: auto;
+  justify-self: flex-end;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 26rpx;
+}
+
+.footer_links {
+  color: rgb(97, 106, 139);
+}
+
+.footer_text {
+  color: rgb(111, 111, 111);
+}

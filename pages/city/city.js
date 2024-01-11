@@ -36,7 +36,6 @@ Page({
     });
   },
   inputTyping(e) {
-    // console.log(e)
     this.setData({
       inputVal: e.detail.value,
       city_panel_showed: !e.detail.value
@@ -48,7 +47,6 @@ Page({
           name: e.detail.value
         }
       }).then((res) => {
-        // console.log(res.data.data)
         this.setData({
           search_cities: res.data
         })
@@ -57,6 +55,10 @@ Page({
   },
   // 选择城市，从Search Result中选择
   chooseCity(event) {
+    wx.showLoading({
+      title: 'Loading...',
+      mask: true
+    })
     request({
       url: APP_CONFIG.apis.follow_city.follow,
       data: {
@@ -76,7 +78,11 @@ Page({
     })
   },
   // 切换城市
-  toggleCity(event) {
+  toggleCity(event) { 
+    wx.showLoading({
+      title: 'Loading...',
+      mask: true
+    })
     this.backup(event.currentTarget.dataset.divisionId)
   },
   backup(divisionId) {
@@ -85,20 +91,24 @@ Page({
     }).then(res => {
       const eventChannel = this.getOpenerEventChannel()
       eventChannel.emit('acceptSwithCityData', {
-        admin_division: {
+        region: {
           ...res.data
         },
-        switch_to_top: true,
-        index: 0
+        switch_to_top: true
       })
+      wx.hideLoading()
       wx.navigateBack({
         delta: 1
       })
     })
   },
   unFollow(event) {
-    console.log(event)
     const { id, divisionId } = event.currentTarget.dataset;
+    const eventChannel = this.getOpenerEventChannel()
+    wx.showLoading({
+      title: '数据请求中...',
+      mask: true
+    })
     request({
       url: APP_CONFIG.apis.follow_city.un_follow + id,
       method: "DELETE"
@@ -112,20 +122,15 @@ Page({
       this.setData({
         follow_cities
       })
-      const eventChannel = this.getOpenerEventChannel()
       eventChannel.emit('refreshEvent', { reflush: true, un_follow_id: divisionId })
+      setTimeout(() => {
+        wx.hideLoading()
+      }, 200)
     })
   },
   slidingStart(e) {
-    // let cities = this.data.follow_cities;
-    // cities.forEach(element => {
-    //   if (element.offset) {
-    //     element.offset = 0
-    //   }
-    // });
     this.setData({
-      start_x: e.touches[0].pageX,
-      // follow_cities: cities
+      start_x: e.touches[0].pageX
     })
   },
   slidingEnd(e) {
@@ -189,7 +194,7 @@ Page({
     request({
       url: APP_CONFIG.apis.follow_city.list_by_subject_id
     }).then((res) => {
-      console.log(res)
+      // console.log(res)
       this.setData({
         follow_cities: res.data.map(x => ({
           ...x,

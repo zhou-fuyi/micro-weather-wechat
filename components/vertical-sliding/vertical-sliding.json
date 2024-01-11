@@ -1,4 +1,8 @@
 {
   "component": true,
-  "usingComponents": {}
+  "componentGenerics": {
+    "item-container": true
+	},
+  "usingComponents": {},
+  "styleIsolation": "apply-shared"
 }
