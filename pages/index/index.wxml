@@ -37,7 +37,7 @@
         bind:change="swiperChange"
         bind:choose="onChoose"
         bind:scrollslidingstatus="scrollSlidingHandle"
-        bind:follow="onFollowUpdate"
+        bind:handleFollow="handleFollow"
         bind:fetchairdata="onFetchAirData"
         bind:fetchweatherData="onFetchWeatherData"
         style="height: 100%;width: 100%">

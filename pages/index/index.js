@@ -243,13 +243,13 @@ Page({
    * 城市关注事件处理, 事件穿透到index页面
    * @param {*} event 
    */
-  onFollowUpdate(event) {
+  handleFollow(event) {
+    let { id, followed } = event.detail
     // 以下注释仅更改状态，删除时当前卡片保留
-    // let { id, followed } = event.detail
     // const { merged_cities } = this.data;
     // merged_cities.forEach(item => {
     //   if (item.id === id) {
-    //     item.followed = !followed;
+    //     item.followed = followed;
     //     return
     //   }
     // })
@@ -257,7 +257,12 @@ Page({
     //   merged_cities
     // })
     // 以下语句会重新刷新所有关注城市
-    this.followCitiesRefreshEvenHandler({reflush: true})
+    if (followed) {
+      this.followCitiesRefreshEvenHandler({ reflush: true })
+    } else {
+      // 取消关注
+      this.followCitiesRefreshEvenHandler({ reflush: true, un_follow_id: id })
+    }
   },
   swiperChange(event) {
     let current = event.detail.current
@@ -383,16 +388,26 @@ Page({
       request({
         url: APP_CONFIG.apis.follow_city.list_by_subject_id
       }).then(res => {
-        const followed_cities = util.mapFollowcities(res.data)
-        // 因 merge cities 可能会删除 followed_cities中数据，所以刷新缓存动作需要放置在setData前
-        wx.setStorageSync(APP_CONFIG.constants.followed_cities, followed_cities)
-        if (followed_cities.length > 0) {
-          this.setData({
-            followed_cities,
-            outer_index: _index,
-            intervene: true
-          })
+        const { merged_cities } = this.data
+        const last_cities = util.mapFollowcities(res.data)
+        for (let out_index = last_cities.length - 1; out_index >= 0; out_index--) {
+          for (let index = merged_cities.length - 1; index >= 0; index--) {
+            if (last_cities[out_index].code === merged_cities[index].code) {
+              // 避免切换导致已存在的天气数据丢失
+              last_cities[out_index] = {
+                ...merged_cities[index],
+                ...last_cities[out_index]
+              }
+            }
+          }
         }
+        // 因 merge cities 可能会删除 followed_cities中数据，所以刷新缓存动作需要放置在setData前
+        wx.setStorageSync(APP_CONFIG.constants.followed_cities, last_cities)
+        this.setData({
+          followed_cities: last_cities,
+          outer_index: _index,
+          intervene: true
+        })
       })
     }
   },
@@ -650,7 +665,7 @@ Page({
     });
   },
   interveneCurrent({ length } = { length: 0 }) {
-    const intervene = this.data.intervene
+    const {intervene, merged_cities} = this.data
     if (intervene) {
       let index = this.data.outer_index
       if (index < 0 || length === 0 || (index > 0 && index >= length)) {
@@ -658,6 +673,11 @@ Page({
       }
       this.setData({
         current: index,
+        current_city: merged_cities[index],
+        location: {
+          longitude: merged_cities[index].centerPoint.coordinates[0],
+          latitude: merged_cities[index].centerPoint.coordinates[1]
+        },
         intervene: false
       })
     }
@@ -672,7 +692,7 @@ Page({
     })
   },
 
-  scaleToDefault(){
+  scaleToDefault() {
     const scale = MAP_CONFIG.scale
     util.getScale(this.mapCtx).then((res) => {
       return new Promise((resolve, reject) => {
@@ -690,7 +710,7 @@ Page({
     }).catch(err => {
       // console.log(err)
     })
-    
+
   },
   /**
    * 生命周期函数--监听页面加载
@@ -723,9 +743,9 @@ Page({
       })
     }
   },
-    /**
-   * 生命周期函数--监听页面隐藏
-   */
+  /**
+ * 生命周期函数--监听页面隐藏
+ */
   onHide: function () {
 
   },

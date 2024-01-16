@@ -141,6 +141,7 @@ Component({
           this.setData({
             region
           })
+          this.triggerEvent('handleFollow', region, { bubbles: true, composed: true })
         }).catch(err => {
           wx.showToast({
             title: '关注城市失败',
@@ -157,6 +158,7 @@ Component({
             this.setData({
               region
             })
+            this.triggerEvent('handleFollow', region, { bubbles: true, composed: true })
           }).catch(err => {
             wx.showToast({
               title: '取消关注城市失败',
