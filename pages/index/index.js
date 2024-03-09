@@ -665,19 +665,23 @@ Page({
     });
   },
   interveneCurrent({ length } = { length: 0 }) {
-    const {intervene, merged_cities} = this.data
+    const {intervene, merged_cities, location} = this.data
+    let _location = location;
     if (intervene) {
       let index = this.data.outer_index
       if (index < 0 || length === 0 || (index > 0 && index >= length)) {
         index = 0
       }
+      if(merged_cities[index].centerPoint){
+        _location = {
+          longitude: merged_cities[index].centerPoint.coordinates[0],
+          latitude: merged_cities[index].centerPoint.coordinates[1]
+        }
+      }
       this.setData({
         current: index,
         current_city: merged_cities[index],
-        location: {
-          longitude: merged_cities[index].centerPoint.coordinates[0],
-          latitude: merged_cities[index].centerPoint.coordinates[1]
-        },
+        location: _location,
         intervene: false
       })
     }
