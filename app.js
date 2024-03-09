@@ -76,7 +76,7 @@ App({
       }).catch((err) => {
         reject(err)
         wx.showToast({
-          title: '令牌国企，将自动重新登陆.'
+          title: '令牌过期，将自动重新登陆.'
         })
       })
     })
