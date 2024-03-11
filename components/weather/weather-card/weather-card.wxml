@@ -33,7 +33,7 @@
                 <view class="footer_links">
                     <navigator url="javascript:">数据由和风天气提供</navigator>
                 </view>
-                <view class="footer_text">Copyright © weather.zhoujian.site 2022-2022</view>
+                <view class="footer_text">Copyright © weather.zhoujian.site 2022-{{date_time_struct.year}}</view>
             </view>
         </view>
     </view>
