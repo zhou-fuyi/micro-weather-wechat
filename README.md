@@ -65,22 +65,34 @@ ps: 天气小程序是为了验证自己进入全栈的磨刀石，如今产出�
 
 而后使用自己的小程序、和风天气、腾讯地图密钥替换即可
 
+也就是说：
+
+1、你需要先注册自己的小程序，以便获取合法的小程序id、key以及密钥
+
+2、而后注册[和风天气](https://id.qweather.com/#/login)，并创建一个应用，注意选择免费项目
+
+3、注册[腾讯位置服务](https://lbs.qq.com/)，并创建应用，用于后续使用静态图
+
+而后你才可以
+
+4、拉取服务端代码，并构建调试环境。使用docker可快速构建本地调试环境【记得替换各种配置】
+
+5、拉取小程序代码（即本仓库），通过微信小程序开发者工具可以开始完整调试【记得替换appid】
+
 ## 截图
 
 <div style="display:inline-block">
-  <img src="https://cdn.jsdelivr.net/gh/zhou-fuyi/micro-weather-docs/refs/imgs/v1/1.jpg" alt="主页1">
-  <img src="https://cdn.jsdelivr.net/gh/zhou-fuyi/micro-weather-docs/refs/imgs/v1/2.jpg" alt="主页2">
-  <img src="https://cdn.jsdelivr.net/gh/zhou-fuyi/micro-weather-docs/refs/imgs/v1/3.jpg" alt="主页3">
+  <img src="https://cdn.jsdelivr.net/gh/zhou-fuyi/micro-weather-docs/refs/imgs/v1/1.jpg" alt="主页1" width="330"><img src="https://cdn.jsdelivr.net/gh/zhou-fuyi/micro-weather-docs/refs/imgs/v1/2.jpg" alt="主页2" width="330"><img src="https://cdn.jsdelivr.net/gh/zhou-fuyi/micro-weather-docs/refs/imgs/v1/3.jpg" alt="主页3" width="330">
 </div>
 
 <div style="display:inline-block">
-  <img src="https://cdn.jsdelivr.net/gh/zhou-fuyi/micro-weather-docs/refs/imgs/v1/4.jpg" alt="城市1">
-  <img src="https://cdn.jsdelivr.net/gh/zhou-fuyi/micro-weather-docs/refs/imgs/v1/5.jpg" alt="城市2">
+  <img src="https://cdn.jsdelivr.net/gh/zhou-fuyi/micro-weather-docs/refs/imgs/v1/4.jpg" alt="城市1" width="330">
+  <img src="https://cdn.jsdelivr.net/gh/zhou-fuyi/micro-weather-docs/refs/imgs/v1/5.jpg" alt="城市2" width="330">
 </div>
 
 <div style="display:inline-block">
-  <img src="https://cdn.jsdelivr.net/gh/zhou-fuyi/micro-weather-docs/refs/imgs/v1/6.jpg" alt="海报1">
-  <img src="https://cdn.jsdelivr.net/gh/zhou-fuyi/micro-weather-docs/refs/imgs/v1/7.png" alt="海报2">
+  <img src="https://cdn.jsdelivr.net/gh/zhou-fuyi/micro-weather-docs/refs/imgs/v1/6.jpg" alt="海报1" width="330">
+  <img src="https://cdn.jsdelivr.net/gh/zhou-fuyi/micro-weather-docs/refs/imgs/v1/7.png" alt="海报2" width="330">
 </div>
 
 ## 支持
