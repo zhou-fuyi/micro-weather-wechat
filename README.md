@@ -79,6 +79,10 @@ ps: 天气小程序是为了验证自己进入全栈的磨刀石，如今产出�
 
 5、拉取小程序代码（即本仓库），通过微信小程序开发者工具可以开始完整调试【记得替换appid】
 
+## 部署
+
+[Demo环境快速构建指南](https://github.com/zhou-fuyi/micro-weather-docs/blob/main/deploy/docker-compose/demo/README.md)
+
 ## 截图
 
 <div style="display:inline-block">
